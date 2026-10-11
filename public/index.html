@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mirante · o planeta ao vivo</title>
+    <meta
+      name="description"
+      content="Globo 3D com voos sobre o Brasil, terremotos e satélites em tempo real, usando apenas dados abertos."
+    />
+    <link rel="icon" href="img/icone.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/cesium@1.146.0/Build/Cesium/Widgets/widgets.css"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/cesium@1.146.0/Build/Cesium/Cesium.js"></script>
+  </head>
+  <body data-modo="normal">
+    <div id="globo"></div>
+    <div class="vinheta" aria-hidden="true"></div>
+
+    <header class="topo">
+      <div class="marca">
+        <img src="img/icone.svg" alt="" width="36" height="36" />
+        <div>
+          <h1>MIRANTE</h1>
+          <p>o planeta ao vivo · dados abertos</p>
+        </div>
+      </div>
+      <div class="relogio" aria-label="Horário atual">
+        <span id="relogio-utc">--:--:--</span>
+        <small id="relogio-brasilia">Brasília --:--</small>
+      </div>
+    </header>
+
+    <aside class="painel" id="painel">
+      <button class="painel-alternar" id="painel-alternar" type="button" aria-expanded="true">
+        Controles
+      </button>
+
+      <div class="painel-conteudo" id="painel-conteudo">
+        <section>
+          <h2>Camadas</h2>
+          <label class="camada" data-camada="voos">
+            <input type="checkbox" checked />
+            <span class="ponto"></span>
+            <span class="nome">Voos no Brasil</span>
+            <span class="contagem" id="conta-voos">…</span>
+          </label>
+          <label class="camada" data-camada="terremotos">
+            <input type="checkbox" checked />
+            <span class="ponto"></span>
+            <span class="nome">Terremotos (24 h)</span>
+            <span class="contagem" id="conta-terremotos">…</span>
+          </label>
+          <label class="camada" data-camada="satelites">
+            <input type="checkbox" checked />
+            <span class="ponto"></span>
+            <span class="nome">Satélites e estações</span>
+            <span class="contagem" id="conta-satelites">…</span>
+          </label>
+        </section>
+
+        <section>
+          <h2>Ir para</h2>
+          <div class="botoes">
+            <button type="button" data-destino="brasil">Brasil</button>
+            <button type="button" data-destino="saopaulo">São Paulo</button>
+            <button type="button" data-destino="rio">Rio de Janeiro</button>
+            <button type="button" data-destino="planeta">Planeta</button>
+            <button type="button" data-destino="iss" class="largo">Seguir a ISS</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>Modo de visão</h2>
+          <div class="botoes modos">
+            <button type="button" data-modo="normal" class="ativo">Normal</button>
+            <button type="button" data-modo="noturna">Noturna</button>
+            <button type="button" data-modo="termica">Térmica</button>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <article class="ficha" id="ficha" hidden aria-live="polite">
+      <button class="fechar" id="fechar-ficha" type="button" aria-label="Fechar">×</button>
+      <p class="ficha-tipo" id="ficha-tipo"></p>
+      <h3 id="ficha-titulo"></h3>
+      <dl id="ficha-dados"></dl>
+      <a id="ficha-link" target="_blank" rel="noopener noreferrer" hidden></a>
+    </article>
+
+    <footer class="creditos">
+      <span>
+        Dados: <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a> ·
+        <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener">USGS</a> ·
+        <a href="https://celestrak.org" target="_blank" rel="noopener">CelesTrak</a> · imagens Esri
+      </span>
+      <div id="creditos-cesium"></div>
+    </footer>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

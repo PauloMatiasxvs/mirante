@@ -1,0 +1,15 @@
+{
+  "name": "mirante",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Globo 3D com voos sobre o Brasil, terremotos e satélites em tempo real, usando apenas dados abertos.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "author": "PauloMatiasxvs"
+}
