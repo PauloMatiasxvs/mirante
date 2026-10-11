@@ -9,6 +9,7 @@ import { numero } from './formatos.js';
 import { projetar } from './geo.js';
 import { CIDADES } from './cidades.js';
 import { criarMapaBase } from './mapa-base.js';
+import { criarCockpit } from './cockpit.js';
 
 const { Cesium } = window;
 
@@ -152,6 +153,8 @@ const camadas = {
   predios: criarCamadaPredios(viewer, terrenoPronto, aoAtualizar('predios')),
 };
 
+const cockpit = criarCockpit(viewer, camadas.voos);
+
 for (const rotulo of document.querySelectorAll('.camada')) {
   const camada = camadas[rotulo.dataset.camada];
   rotulo.querySelector('input').addEventListener('change', (evento) => {
@@ -159,6 +162,7 @@ for (const rotulo of document.querySelectorAll('.camada')) {
     if (!evento.target.checked && viewer.selectedEntity?.id.startsWith(camada.prefixo)) {
       viewer.selectedEntity = undefined;
     }
+    if (!evento.target.checked && camada === camadas.voos) cockpit.sair();
   });
 }
 
@@ -168,8 +172,14 @@ function atualizarFicha() {
   const entidade = viewer.selectedEntity;
   const camada = entidade && Object.values(camadas).find((c) => entidade.id.startsWith(c.prefixo));
   const conteudo = camada?.descrever(entidade);
-  if (conteudo) mostrarFicha(conteudo);
-  else esconderFicha();
+  if (!conteudo) {
+    esconderFicha();
+    return;
+  }
+  if (camada === camadas.voos && !camadas.voos.dados(entidade.id)?.onGround) {
+    conteudo.acao = { texto: 'Entrar no cockpit', executar: () => cockpit.entrar(entidade.id) };
+  }
+  mostrarFicha(conteudo);
 }
 
 viewer.selectedEntityChanged.addEventListener(atualizarFicha);
@@ -190,8 +200,18 @@ const destinos = {
 };
 
 for (const botao of document.querySelectorAll('[data-destino]')) {
-  botao.addEventListener('click', () => destinos[botao.dataset.destino]());
+  botao.addEventListener('click', () => {
+    cockpit.sair();
+    destinos[botao.dataset.destino]();
+  });
 }
+
+const botaoCockpit = document.getElementById('botao-cockpit');
+botaoCockpit.addEventListener('click', () => {
+  if (cockpit.ativo()) cockpit.sair();
+  else cockpit.entrarNoMaisProximo();
+});
+cockpit.aoMudar((ativo) => botaoCockpit.classList.toggle('ativo', ativo));
 
 for (const botao of document.querySelectorAll('[data-modo]')) {
   botao.addEventListener('click', () => {
@@ -235,4 +255,4 @@ atualizarRelogio();
 setInterval(atualizarRelogio, 1000);
 
 // Útil para depurar no console do navegador.
-window.mirante = { viewer, camadas, destinos, visor };
+window.mirante = { viewer, camadas, destinos, visor, cockpit };

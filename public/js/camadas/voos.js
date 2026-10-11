@@ -82,6 +82,16 @@ function nomeDoVoo(voo) {
   return voo.callsign ?? voo.registration ?? voo.id.toUpperCase();
 }
 
+// Nível de voo, em centenas de pés: 34.000 pés = FL340.
+export function nivelDeVoo(voo) {
+  if (voo.onGround || voo.altitudeFt == null) return 'SOLO';
+  return `FL${String(Math.max(0, Math.round(voo.altitudeFt / 100))).padStart(3, '0')}`;
+}
+
+function rotuloDoVoo(voo) {
+  return `${nomeDoVoo(voo)} · ${nivelDeVoo(voo)}`;
+}
+
 export function criarCamadaVoos(viewer, aoAtualizar) {
   const fonte = new Cesium.CustomDataSource('voos');
   viewer.dataSources.add(fonte);
@@ -109,7 +119,7 @@ export function criarCamadaVoos(viewer, aoAtualizar) {
         existente.billboard.rotation = rotation;
         existente.billboard.heightReference = heightReference;
         existente.label.heightReference = heightReference;
-        existente.label.text = nomeDoVoo(voo);
+        existente.label.text = rotuloDoVoo(voo);
         continue;
       }
 
@@ -125,7 +135,7 @@ export function criarCamadaVoos(viewer, aoAtualizar) {
           scaleByDistance: new Cesium.NearFarScalar(2e4, 1.1, 8e6, 0.3),
         },
         label: {
-          text: nomeDoVoo(voo),
+          text: rotuloDoVoo(voo),
           heightReference,
           font: '600 12px "JetBrains Mono", monospace',
           fillColor: Cesium.Color.fromCssColorString('#e0f2fe'),
@@ -165,6 +175,13 @@ export function criarCamadaVoos(viewer, aoAtualizar) {
   return {
     prefixo: 'voo-',
     fonte,
+    dados: (id) => voos.get(id),
+    nome: (id) => (voos.has(id) ? nomeDoVoo(voos.get(id)) : null),
+    modelo: (id) => {
+      const voo = voos.get(id);
+      return voo ? (MODELOS[voo.type] ?? voo.type ?? '') : '';
+    },
+    noAr: () => [...voos].filter(([, voo]) => !voo.onGround).map(([id]) => id),
     descrever(entidade) {
       const voo = voos.get(entidade.id);
       if (!voo) return null;

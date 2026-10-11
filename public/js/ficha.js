@@ -6,6 +6,9 @@ const tipo = document.getElementById('ficha-tipo');
 const titulo = document.getElementById('ficha-titulo');
 const dados = document.getElementById('ficha-dados');
 const link = document.getElementById('ficha-link');
+const acao = document.getElementById('ficha-acao');
+let executarAcao = null;
+acao.addEventListener('click', () => executarAcao?.());
 
 function elemento(tag, texto) {
   const el = document.createElement(tag);
@@ -32,6 +35,11 @@ export function mostrarFicha(conteudo) {
   } else {
     link.hidden = true;
   }
+
+  // Botão opcional, como "Entrar no cockpit" na ficha de um avião.
+  executarAcao = conteudo.acao?.executar ?? null;
+  acao.hidden = !executarAcao;
+  if (executarAcao) acao.textContent = conteudo.acao.texto;
 }
 
 export function esconderFicha() {

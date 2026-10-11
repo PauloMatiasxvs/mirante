@@ -17,12 +17,18 @@ visor de satélite, com os aviões voando sobre o Brasil, os terremotos das últ
 - ✈️ **Voos ao vivo no Brasil**: posição, altitude, velocidade, modelo e matrícula de
   cada avião. Entre uma atualização e outra o avião segue andando no mapa,
   calculado a partir da velocidade e do rumo.
+- 🧑‍✈️ **Cockpit**: embarque num avião ao vivo e veja em primeira pessoa, com fita de
+  rumo, velocidade, altitude, razão de subida e a lista dos aviões ao redor. Dá para
+  pular de um avião para outro e olhar em volta com as setas do teclado.
 - 🌋 **Terremotos das últimas 24 h** no mundo todo, com tamanho e cor pela magnitude
   e uma onda animada nos mais fortes.
 - 🚀 **Satélites e estações espaciais**: as órbitas são calculadas no próprio navegador
   (modelo SGP4). Dá para seguir a ISS e ver a próxima volta dela ao redor da Terra.
 - 🎥 **Modos de visão** feitos com shaders: visão noturna e câmera térmica.
 - 🖱️ Clique em qualquer avião, terremoto ou satélite para abrir uma ficha com os detalhes.
+- 🇧🇷 Tudo em português, inclusive os nomes no mapa.
+
+![Cockpit de um Boeing 737 a 22 mil pés, com os aviões ao redor](docs/cockpit.jpg)
 
 | Copacabana com os morros | Avenida Paulista | Visão noturna |
 | --- | --- | --- |
@@ -52,6 +58,7 @@ public/                 site estático (HTML, CSS e JavaScript puro)
   js/main.js            monta o globo, a luz, as sombras e liga os controles
   js/camadas/           uma camada por fonte de dados (voos, terremotos, satélites, prédios)
   js/visor.js           visor de satélite e telemetria
+  js/cockpit.js         modo cockpit (primeira pessoa num avião ao vivo)
   js/mapa-base.js       nomes em português e fronteiras desenhados sobre o relevo
   js/modos.js           shaders de visão noturna e térmica
   js/cidades.js         cidades em 3D: área dos prédios e ângulo de câmera

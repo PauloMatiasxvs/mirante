@@ -58,6 +58,45 @@
       </dl>
     </div>
 
+    <div class="cockpit" id="cockpit" hidden>
+      <p class="cockpit-titulo">
+        <span class="ao-vivo">●</span> PRIMEIRA PESSOA · <b data-cockpit="voo">—</b>
+        <span data-cockpit="modelo"></span>
+      </p>
+      <svg class="cockpit-fita" id="cockpit-fita" viewBox="-300 -12 600 46" aria-hidden="true"></svg>
+      <svg class="cockpit-marcador" viewBox="-40 -20 80 40" aria-hidden="true">
+        <circle r="6" />
+        <path d="M-32 0H-6M6 0H32M0-6V-15" />
+      </svg>
+      <div class="cockpit-leituras">
+        <div>
+          <small>Velocidade</small>
+          <strong data-cockpit="velocidade">—</strong>
+          <small>nós</small>
+        </div>
+        <div class="cockpit-rumo">
+          <small>Rumo</small>
+          <strong data-cockpit="rumo">—</strong>
+          <small>graus</small>
+        </div>
+        <div>
+          <small>Altitude</small>
+          <strong data-cockpit="altitude">—</strong>
+          <small data-cockpit="vertical">pés</small>
+        </div>
+      </div>
+      <aside class="cockpit-contatos">
+        <h2>Aviões ao redor</h2>
+        <ol id="cockpit-contatos"></ol>
+      </aside>
+      <div class="cockpit-botoes">
+        <button type="button" data-cockpit-acao="anterior">◀ Anterior</button>
+        <button type="button" data-cockpit-acao="sair">Sair do cockpit</button>
+        <button type="button" data-cockpit-acao="proximo">Próximo ▶</button>
+      </div>
+      <p class="cockpit-dica">Esc sai · setas olham em volta</p>
+    </div>
+
     <header class="marca">
       <img src="img/icone.svg" alt="" width="34" height="34" />
       <div>
@@ -107,6 +146,7 @@
       <h3 id="ficha-titulo"></h3>
       <dl id="ficha-dados"></dl>
       <a id="ficha-link" target="_blank" rel="noopener noreferrer" hidden></a>
+      <button class="ficha-acao" id="ficha-acao" type="button" hidden></button>
     </article>
 
     <nav class="dock" aria-label="Destinos e modos de visão">
@@ -117,6 +157,7 @@
         <button type="button" data-destino="rio">Rio</button>
         <button type="button" data-destino="fortaleza">Fortaleza</button>
         <button type="button" data-destino="iss">ISS</button>
+        <button type="button" id="botao-cockpit">Cockpit</button>
       </div>
       <span class="dock-separador" aria-hidden="true"></span>
       <div class="dock-grupo" role="group" aria-label="Modo de visão">
