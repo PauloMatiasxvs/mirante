@@ -31,12 +31,10 @@
       <svg class="visor-mira" viewBox="-60 -60 120 120" aria-hidden="true">
         <path d="M-60 0H-14M14 0H60M0-60V-14M0 14V60" />
         <path d="M-32-24V-32H-24M24-32H32V-24M32 24V32H24M-24 32H-32V24" />
-        <circle r="2.5" />
+        <circle r="2" />
       </svg>
       <p class="visor-cabecalho">
-        <span class="visor-rec">● REC</span>
-        <span data-campo="rec">--:--:--Z</span>
-        <span>· MIRANTE-1 · SENSOR ÓPTICO</span>
+        <span class="visor-rec">●</span> REC <span data-campo="rec">--:--:--Z</span>
       </p>
       <dl class="visor-dados visor-esquerda">
         <dt>Alvo</dt>
@@ -60,79 +58,48 @@
       </dl>
     </div>
 
-    <header class="topo">
-      <div class="marca">
-        <img src="img/icone.svg" alt="" width="36" height="36" />
-        <div>
-          <h1>MIRANTE</h1>
-          <p>o planeta ao vivo · dados abertos</p>
-        </div>
-      </div>
-      <div class="relogio" aria-label="Horário atual">
-        <span id="relogio-utc">--:--:--</span>
-        <small id="relogio-brasilia">Brasília --:--</small>
+    <header class="marca">
+      <img src="img/icone.svg" alt="" width="34" height="34" />
+      <div>
+        <h1>MIRANTE</h1>
+        <p>o planeta ao vivo</p>
       </div>
     </header>
 
-    <aside class="painel" id="painel">
-      <button class="painel-alternar" id="painel-alternar" type="button" aria-expanded="true">
-        Controles
-      </button>
+    <div class="status">
+      <span id="relogio-utc" class="relogio">--:--:-- UTC</span>
+      <span id="relogio-brasilia" class="relogio-local">Brasília --:--</span>
+      <span class="contagens" aria-label="Dados carregados">
+        <span title="Voos"><i class="ponto voos"></i><b id="conta-voos">…</b></span>
+        <span title="Terremotos (24 h)"><i class="ponto terremotos"></i><b id="conta-terremotos">…</b></span>
+        <span title="Satélites"><i class="ponto satelites"></i><b id="conta-satelites">…</b></span>
+        <span title="Prédios em 3D"><i class="ponto predios"></i><b id="conta-predios">…</b></span>
+      </span>
+    </div>
 
-      <div class="painel-conteudo" id="painel-conteudo">
-        <section>
-          <h2>Camadas</h2>
-          <label class="camada" data-camada="voos">
-            <input type="checkbox" checked />
-            <span class="ponto"></span>
-            <span class="nome">Voos no Brasil</span>
-            <span class="contagem" id="conta-voos">…</span>
-          </label>
-          <label class="camada" data-camada="terremotos">
-            <input type="checkbox" checked />
-            <span class="ponto"></span>
-            <span class="nome">Terremotos (24 h)</span>
-            <span class="contagem" id="conta-terremotos">…</span>
-          </label>
-          <label class="camada" data-camada="satelites">
-            <input type="checkbox" checked />
-            <span class="ponto"></span>
-            <span class="nome">Satélites e estações</span>
-            <span class="contagem" id="conta-satelites">…</span>
-          </label>
-          <label class="camada" data-camada="predios">
-            <input type="checkbox" checked />
-            <span class="ponto"></span>
-            <span class="nome">Prédios em 3D</span>
-            <span class="contagem" id="conta-predios">…</span>
-          </label>
-        </section>
-
-        <section>
-          <h2>Ir para</h2>
-          <div class="botoes">
-            <button type="button" data-destino="brasil">Brasil</button>
-            <button type="button" data-destino="planeta">Planeta</button>
-            <button type="button" data-destino="saopaulo">São Paulo</button>
-            <button type="button" data-destino="rio">Rio de Janeiro</button>
-            <button type="button" data-destino="fortaleza">Fortaleza</button>
-            <button type="button" data-destino="iss">Seguir a ISS</button>
-          </div>
-        </section>
-
-        <section>
-          <h2>Modo de visão</h2>
-          <div class="botoes modos">
-            <button type="button" data-modo="normal" class="ativo">Normal</button>
-            <button type="button" data-modo="noturna">Noturna</button>
-            <button type="button" data-modo="termica">Térmica</button>
-            <button type="button" id="alternar-visor" class="largo ativo" aria-pressed="true">
-              Visor de satélite
-            </button>
-          </div>
-        </section>
-      </div>
-    </aside>
+    <details class="gaveta">
+      <summary>Camadas</summary>
+      <label class="camada" data-camada="voos">
+        <input type="checkbox" checked />
+        <i class="ponto voos"></i>
+        <span>Voos no Brasil</span>
+      </label>
+      <label class="camada" data-camada="terremotos">
+        <input type="checkbox" checked />
+        <i class="ponto terremotos"></i>
+        <span>Terremotos (24 h)</span>
+      </label>
+      <label class="camada" data-camada="satelites">
+        <input type="checkbox" checked />
+        <i class="ponto satelites"></i>
+        <span>Satélites e estações</span>
+      </label>
+      <label class="camada" data-camada="predios">
+        <input type="checkbox" checked />
+        <i class="ponto predios"></i>
+        <span>Prédios em 3D</span>
+      </label>
+    </details>
 
     <article class="ficha" id="ficha" hidden aria-live="polite">
       <button class="fechar" id="fechar-ficha" type="button" aria-label="Fechar">×</button>
@@ -142,13 +109,31 @@
       <a id="ficha-link" target="_blank" rel="noopener noreferrer" hidden></a>
     </article>
 
+    <nav class="dock" aria-label="Destinos e modos de visão">
+      <div class="dock-grupo" role="group" aria-label="Ir para">
+        <button type="button" data-destino="brasil">Brasil</button>
+        <button type="button" data-destino="planeta">Planeta</button>
+        <button type="button" data-destino="saopaulo">São Paulo</button>
+        <button type="button" data-destino="rio">Rio</button>
+        <button type="button" data-destino="fortaleza">Fortaleza</button>
+        <button type="button" data-destino="iss">ISS</button>
+      </div>
+      <span class="dock-separador" aria-hidden="true"></span>
+      <div class="dock-grupo" role="group" aria-label="Modo de visão">
+        <button type="button" data-modo="normal" class="ativo">Normal</button>
+        <button type="button" data-modo="noturna">Noturna</button>
+        <button type="button" data-modo="termica">Térmica</button>
+        <button type="button" id="alternar-visor" class="ativo" aria-pressed="true">Visor</button>
+      </div>
+    </nav>
+
     <footer class="creditos">
       <span>
-        Dados: <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a> ·
+        <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a> ·
         <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener">USGS</a> ·
-        <a href="https://celestrak.org" target="_blank" rel="noopener">CelesTrak</a> · prédios
+        <a href="https://celestrak.org" target="_blank" rel="noopener">CelesTrak</a> ·
         <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
-        · imagens e relevo Esri
+        · Esri
       </span>
       <div id="creditos-cesium"></div>
     </footer>

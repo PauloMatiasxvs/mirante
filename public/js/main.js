@@ -54,6 +54,8 @@ const viewer = new Cesium.Viewer('globo', {
 viewer.imageryLayers.addImageryProvider(nomesDeLugares);
 const { scene } = viewer;
 scene.globe.showGroundAtmosphere = true;
+// Cor de fundo enquanto as imagens de satélite carregam (o padrão é um azul forte).
+scene.globe.baseColor = Cesium.Color.fromCssColorString('#0b1422');
 scene.globe.depthTestAgainstTerrain = true;
 scene.globe.enableLighting = true;
 scene.postProcessStages.fxaa.enabled = true;
@@ -201,13 +203,6 @@ botaoVisor.addEventListener('click', () => {
   const ligado = visor.alternar();
   botaoVisor.classList.toggle('ativo', ligado);
   botaoVisor.setAttribute('aria-pressed', String(ligado));
-});
-
-const painel = document.getElementById('painel');
-const alternar = document.getElementById('painel-alternar');
-alternar.addEventListener('click', () => {
-  const recolhido = painel.classList.toggle('recolhido');
-  alternar.setAttribute('aria-expanded', String(!recolhido));
 });
 
 // ---------- Relógio ----------

@@ -11,6 +11,7 @@ const GRUPOS = ['stations', 'visual'];
 const VALIDADE_CACHE_MS = 2 * 60 * 60_000;
 const PASSO_S = 20;
 const RECALCULO_MS = 60_000;
+const DISTANCIA_ACOPLADO_M = 50_000;
 const ID_ISS = 25544;
 
 const DESTAQUES = {
@@ -107,10 +108,29 @@ export function criarCamadaSatelites(viewer, aoAtualizar) {
     });
   }
 
+  // Naves acopladas às estações (Soyuz, Progress, Dragon...) ficam no mesmo
+  // ponto da estação; escondê-las evita rótulos encavalados.
+  function acopladoAUmaEstacao(satelite, estacoes, data) {
+    if (DESTAQUES[satelite.norad]) return false;
+    const p = posicaoEm(satelite.satrec, data);
+    return Boolean(p) && estacoes.some((e) => Cesium.Cartesian3.distance(e, cartesiano(p)) < DISTANCIA_ACOPLADO_M);
+  }
+
   // Recalcula alguns minutos de órbita à frente; o Cesium interpola entre os pontos.
   function recalcular() {
     const agora = Date.now();
+    const estacoes = [];
+    for (const satelite of satelites.values()) {
+      const p = DESTAQUES[satelite.norad] && posicaoEm(satelite.satrec, new Date(agora));
+      if (p) estacoes.push(cartesiano(p));
+    }
+
     for (const [id, satelite] of satelites) {
+      const entidade = fonte.entities.getById(id);
+      if (acopladoAUmaEstacao(satelite, estacoes, new Date(agora))) {
+        entidade.show = false;
+        continue;
+      }
       const posicao = new Cesium.SampledPositionProperty();
       posicao.setInterpolationOptions({
         interpolationDegree: 3,
@@ -124,7 +144,6 @@ export function criarCamadaSatelites(viewer, aoAtualizar) {
         posicao.addSample(Cesium.JulianDate.fromDate(data), cartesiano(p));
         amostras++;
       }
-      const entidade = fonte.entities.getById(id);
       entidade.show = amostras >= 4;
       if (entidade.show) entidade.position = posicao;
     }

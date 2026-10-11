@@ -1,27 +1,25 @@
 :root {
-  --fundo: rgba(7, 12, 22, 0.74);
-  --fundo-forte: rgba(7, 12, 22, 0.9);
-  --borda: rgba(148, 163, 184, 0.2);
+  --vidro: rgba(6, 10, 18, 0.62);
+  --vidro-forte: rgba(6, 10, 18, 0.82);
+  --linha: rgba(148, 163, 184, 0.16);
   --texto: #e2e8f0;
-  --suave: #94a3b8;
+  --suave: #8b98ab;
   --destaque: #38bdf8;
-  --destaque-fundo: rgba(56, 189, 248, 0.14);
   --voos: #7dd3fc;
   --terremotos: #fb923c;
   --satelites: #c4b5fd;
+  --predios: #e7ebf0;
   --erro: #f87171;
-  --raio: 14px;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --margem: 22px;
 }
 
 /* O tema da interface acompanha o modo de visão do globo. */
 body[data-modo='noturna'] {
   --destaque: #4ade80;
-  --destaque-fundo: rgba(74, 222, 128, 0.14);
 }
 body[data-modo='termica'] {
   --destaque: #fb923c;
-  --destaque-fundo: rgba(251, 146, 60, 0.15);
 }
 
 * {
@@ -35,7 +33,12 @@ body {
   overflow: hidden;
   background: #02050b;
   color: var(--texto);
-  font: 14px/1.4 Inter, system-ui, sans-serif;
+  font: 13px/1.4 Inter, system-ui, sans-serif;
+}
+
+button {
+  font: inherit;
+  color: inherit;
 }
 
 #globo {
@@ -47,196 +50,259 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55));
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.5));
 }
 
-/* Painéis flutuantes com efeito de vidro. */
-.topo,
-.painel,
-.ficha,
-.creditos {
-  position: fixed;
-  z-index: 2;
-  background: var(--fundo);
-  border: 1px solid var(--borda);
-  border-radius: var(--raio);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+/* Textos soltos sobre o globo precisam de sombra para ler em qualquer fundo. */
+.marca,
+.status,
+.creditos,
+.visor {
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
 }
 
-.topo {
-  top: 16px;
-  left: 16px;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-}
+/* ---------- Marca e status ---------- */
 
 .marca {
+  position: fixed;
+  z-index: 2;
+  top: var(--margem);
+  left: var(--margem);
   display: flex;
   align-items: center;
   gap: 12px;
+  pointer-events: none;
 }
 
 .marca h1 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.32em;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 0.42em;
 }
 
 .marca p {
-  margin: 0;
+  margin: 1px 0 0;
   color: var(--suave);
-  font-size: 12px;
-  letter-spacing: 0.04em;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
 }
 
-.relogio {
+.status {
+  position: fixed;
+  z-index: 2;
+  top: var(--margem);
+  right: var(--margem);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  gap: 2px;
   font-family: var(--mono);
 }
 
-#relogio-utc {
+.relogio {
   color: var(--destaque);
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.08em;
 }
 
-.relogio small {
+.relogio-local {
   color: var(--suave);
   font-size: 11px;
 }
 
-.painel {
-  top: 92px;
-  left: 16px;
-  width: 270px;
-  padding: 6px 16px 14px;
+.contagens {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 11px;
 }
 
-.painel-alternar {
+.contagens span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.contagens b {
+  font-weight: 400;
+  color: var(--texto);
+}
+
+.contagens b.erro {
+  color: var(--erro);
+}
+
+.ponto {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.ponto.voos {
+  background: var(--voos);
+}
+.ponto.terremotos {
+  background: var(--terremotos);
+}
+.ponto.satelites {
+  background: var(--satelites);
+}
+.ponto.predios {
+  background: var(--predios);
+}
+
+/* ---------- Gaveta de camadas ---------- */
+
+.gaveta {
+  position: fixed;
+  z-index: 2;
+  top: 84px;
+  left: var(--margem);
+  min-width: 190px;
+  padding: 0 14px;
+  background: var(--vidro);
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.gaveta summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 9px 0;
+  color: var(--suave);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  list-style: none;
+  cursor: pointer;
+}
+
+.gaveta summary::-webkit-details-marker {
   display: none;
 }
 
-.painel h2 {
-  margin: 14px 0 8px;
-  color: var(--suave);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+.gaveta summary::after {
+  content: '+';
+  font-size: 14px;
+  color: var(--texto);
+}
+
+.gaveta[open] summary::after {
+  content: '−';
+}
+
+.gaveta[open] {
+  padding-bottom: 8px;
 }
 
 .camada {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
-  margin: 0 -10px;
-  border-radius: 10px;
+  padding: 6px 0;
   cursor: pointer;
-}
-
-.camada:hover {
-  background: rgba(148, 163, 184, 0.08);
 }
 
 .camada input {
-  accent-color: var(--destaque);
   margin: 0;
+  accent-color: var(--destaque);
 }
 
-.ponto {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex: none;
-}
-
-[data-camada='voos'] .ponto {
-  background: var(--voos);
-}
-[data-camada='terremotos'] .ponto {
-  background: var(--terremotos);
-}
-[data-camada='satelites'] .ponto {
-  background: var(--satelites);
-}
-
-.camada .nome {
-  flex: 1;
-}
-
-.contagem {
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--destaque);
-}
-
-.contagem.erro {
-  color: var(--erro);
-}
-
-.camada:has(input:not(:checked)) .nome,
-.camada:has(input:not(:checked)) .contagem {
+.camada:has(input:not(:checked)) span {
   opacity: 0.45;
 }
 
-.botoes {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
+/* ---------- Barra de destinos e modos ---------- */
+
+.dock {
+  position: fixed;
+  z-index: 2;
+  bottom: var(--margem);
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: calc(100vw - 2 * var(--margem));
+  padding: 5px;
+  background: var(--vidro);
+  border: 1px solid var(--linha);
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
-.botoes.modos {
-  grid-template-columns: repeat(3, 1fr);
+.dock-grupo {
+  display: flex;
+  gap: 2px;
 }
 
-.botoes .largo {
-  grid-column: 1 / -1;
-}
-
-.botoes button {
-  padding: 8px 6px;
-  border: 1px solid var(--borda);
-  border-radius: 9px;
-  background: rgba(148, 163, 184, 0.06);
-  color: var(--texto);
-  font: inherit;
-  font-size: 13px;
+.dock button {
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--suave);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: color 0.15s, background 0.15s;
 }
 
-.botoes button:hover {
-  border-color: var(--destaque);
+.dock button:hover {
+  color: var(--texto);
+  background: rgba(148, 163, 184, 0.1);
 }
 
-.botoes button.ativo {
-  background: var(--destaque-fundo);
-  border-color: var(--destaque);
+.dock button.ativo {
   color: var(--destaque);
-  font-weight: 600;
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.dock-separador {
+  width: 1px;
+  height: 18px;
+  margin: 0 6px;
+  background: var(--linha);
+  flex: none;
 }
 
 button:focus-visible,
+summary:focus-visible,
 .camada:focus-within {
   outline: 2px solid var(--destaque);
   outline-offset: 2px;
 }
 
+/* ---------- Ficha de detalhes ---------- */
+
 .ficha {
-  right: 16px;
-  top: 92px;
-  width: 300px;
-  padding: 16px 18px;
-  background: var(--fundo-forte);
+  position: fixed;
+  z-index: 2;
+  top: 104px;
+  right: var(--margem);
+  width: 280px;
+  padding: 14px 16px;
+  background: var(--vidro-forte);
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .ficha[hidden] {
@@ -246,21 +312,22 @@ button:focus-visible,
 .ficha-tipo {
   margin: 0;
   color: var(--destaque);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 }
 
 .ficha h3 {
-  margin: 4px 28px 12px 0;
-  font-size: 18px;
+  margin: 4px 28px 10px 0;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .ficha dl {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 6px 14px;
+  gap: 5px 14px;
   margin: 0;
 }
 
@@ -271,14 +338,15 @@ button:focus-visible,
 .ficha dd {
   margin: 0;
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 12px;
   text-align: right;
 }
 
 .ficha a {
   display: inline-block;
-  margin-top: 14px;
+  margin-top: 12px;
   color: var(--destaque);
+  font-size: 12px;
   text-decoration: none;
 }
 
@@ -288,15 +356,15 @@ button:focus-visible,
 
 .fechar {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 28px;
-  height: 28px;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: var(--suave);
-  font-size: 20px;
+  font-size: 18px;
   cursor: pointer;
 }
 
@@ -305,19 +373,22 @@ button:focus-visible,
   color: var(--texto);
 }
 
+/* ---------- Créditos ---------- */
+
 .creditos {
-  right: 16px;
-  bottom: 16px;
+  position: fixed;
+  z-index: 2;
+  right: var(--margem);
+  bottom: 10px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 12px;
+  gap: 10px;
   color: var(--suave);
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .creditos a {
-  color: var(--texto);
+  color: var(--suave);
 }
 
 #creditos-cesium {
@@ -333,7 +404,8 @@ button:focus-visible,
 }
 
 #creditos-cesium .cesium-credit-logoContainer img {
-  height: 16px;
+  height: 13px;
+  opacity: 0.8;
 }
 
 #creditos-cesium .cesium-credit-textContainer {
@@ -341,20 +413,16 @@ button:focus-visible,
 }
 
 #creditos-cesium .cesium-credit-expand-link {
-  color: var(--texto);
+  color: var(--suave);
   text-decoration: underline;
   white-space: nowrap;
   cursor: pointer;
 }
 
-[data-camada='predios'] .ponto {
-  background: #e7ebf0;
-}
-
 /* ---------- Visor de satélite ---------- */
 
 .visor {
-  --raio-visor: min(44vh, 44vw);
+  --raio-visor: min(42vh, 42vw);
   position: fixed;
   inset: 0;
   z-index: 1;
@@ -365,9 +433,9 @@ button:focus-visible,
     radial-gradient(
       circle at 50% 50%,
       transparent 0 var(--raio-visor),
-      rgba(1, 4, 10, 0.86) calc(var(--raio-visor) + 1px)
+      rgba(2, 5, 11, 0.6) calc(var(--raio-visor) + 1px)
     ),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px);
 }
 
 .visor[hidden] {
@@ -392,26 +460,26 @@ button:focus-visible,
 .visor-bussola .aro {
   fill: none;
   stroke: currentColor;
-  stroke-opacity: 0.55;
-  stroke-width: 1.5;
+  stroke-opacity: 0.4;
+  stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
 
 .visor-bussola line {
   stroke: currentColor;
-  stroke-opacity: 0.45;
+  stroke-opacity: 0.3;
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
 
 .visor-bussola line.longo {
-  stroke-opacity: 0.9;
-  stroke-width: 2;
+  stroke-opacity: 0.75;
 }
 
 .visor-bussola text {
   fill: currentColor;
-  font: 600 6px var(--mono);
+  fill-opacity: 0.85;
+  font: 500 5px var(--mono);
   text-anchor: middle;
   dominant-baseline: middle;
 }
@@ -420,30 +488,31 @@ button:focus-visible,
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   translate: -50% -50%;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.2;
+  stroke-width: 1;
   vector-effect: non-scaling-stroke;
-  opacity: 0.85;
+  opacity: 0.7;
 }
 
 .visor-mira circle {
   fill: currentColor;
 }
 
+/* Cabeçalho dentro do círculo, logo abaixo do aro. */
 .visor-cabecalho {
   position: absolute;
-  top: 96px;
+  top: calc(50% - var(--raio-visor) + 34px);
   left: 50%;
   translate: -50% 0;
   margin: 0;
-  font-size: 13px;
-  letter-spacing: 0.12em;
+  font-size: 11px;
+  letter-spacing: 0.2em;
   white-space: nowrap;
-  text-shadow: 0 0 8px rgba(0, 0, 0, 0.9);
+  opacity: 0.85;
 }
 
 .visor-rec {
@@ -459,20 +528,19 @@ button:focus-visible,
 
 .visor-dados {
   position: absolute;
-  bottom: 24px;
+  bottom: 64px;
   display: grid;
   grid-template-columns: auto auto;
-  gap: 3px 14px;
+  gap: 2px 14px;
   margin: 0;
-  font-size: 13px;
-  text-shadow: 0 0 8px rgba(0, 0, 0, 0.9);
+  font-size: 11px;
 }
 
 .visor-dados dt {
-  opacity: 0.6;
+  opacity: 0.55;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 11px;
+  font-size: 9px;
   align-self: center;
 }
 
@@ -481,12 +549,11 @@ button:focus-visible,
 }
 
 .visor-esquerda {
-  left: 24px;
+  left: var(--margem);
 }
 
 .visor-direita {
-  right: 24px;
-  bottom: 64px;
+  right: var(--margem);
 }
 
 .visor-direita dd {
@@ -499,66 +566,44 @@ button:focus-visible,
   }
 }
 
-/* Celular: o painel vira uma gaveta no rodapé. */
+/* ---------- Celular ---------- */
+
 @media (max-width: 720px) {
-  .topo {
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    padding: 8px 12px;
+  :root {
+    --margem: 12px;
   }
 
   .marca h1 {
     font-size: 15px;
   }
 
-  .marca p {
-    display: none;
-  }
-
-  .painel {
-    top: auto;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-    width: auto;
-    max-height: 48vh;
-    overflow-y: auto;
-    padding: 4px 14px 10px;
-  }
-
-  .painel-alternar {
-    display: block;
-    width: 100%;
-    padding: 8px 0 4px;
-    border: 0;
-    background: none;
-    color: var(--suave);
-    font: inherit;
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    cursor: pointer;
-  }
-
-  .painel.recolhido .painel-conteudo {
-    display: none;
-  }
-
-  .ficha {
-    top: 66px;
-    left: 10px;
-    right: 10px;
-    width: auto;
-  }
-
+  .marca p,
+  .relogio-local,
   .creditos,
   .visor-dados {
     display: none;
   }
 
-  .visor-cabecalho {
-    top: 64px;
-    font-size: 11px;
+  .contagens {
+    gap: 8px;
+  }
+
+  .gaveta {
+    top: 70px;
+  }
+
+  .ficha {
+    top: auto;
+    bottom: 70px;
+    left: var(--margem);
+    right: var(--margem);
+    width: auto;
+  }
+
+  .dock {
+    left: var(--margem);
+    right: var(--margem);
+    translate: none;
+    border-radius: 12px;
   }
 }
