@@ -320,13 +320,183 @@ button:focus-visible,
   color: var(--texto);
 }
 
+#creditos-cesium {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#creditos-cesium > * {
+  position: static !important;
+  display: inline-flex !important;
+  align-items: center;
+}
+
 #creditos-cesium .cesium-credit-logoContainer img {
   height: 16px;
 }
 
-#creditos-cesium .cesium-credit-textContainer,
+#creditos-cesium .cesium-credit-textContainer {
+  display: none !important;
+}
+
 #creditos-cesium .cesium-credit-expand-link {
+  color: var(--texto);
+  text-decoration: underline;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+[data-camada='predios'] .ponto {
+  background: #e7ebf0;
+}
+
+/* ---------- Visor de satélite ---------- */
+
+.visor {
+  --raio-visor: min(44vh, 44vw);
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  color: var(--destaque);
+  font-family: var(--mono);
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 0 var(--raio-visor),
+      rgba(1, 4, 10, 0.86) calc(var(--raio-visor) + 1px)
+    ),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
+}
+
+.visor[hidden] {
   display: none;
+}
+
+/* Com o visor ligado, a vinheta comum sai de cena. */
+.com-visor .vinheta {
+  display: none;
+}
+
+.visor-bussola {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(2 * var(--raio-visor));
+  height: calc(2 * var(--raio-visor));
+  translate: -50% -50%;
+  overflow: visible;
+}
+
+.visor-bussola .aro {
+  fill: none;
+  stroke: currentColor;
+  stroke-opacity: 0.55;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.visor-bussola line {
+  stroke: currentColor;
+  stroke-opacity: 0.45;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.visor-bussola line.longo {
+  stroke-opacity: 0.9;
+  stroke-width: 2;
+}
+
+.visor-bussola text {
+  fill: currentColor;
+  font: 600 6px var(--mono);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.visor-mira {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 140px;
+  height: 140px;
+  translate: -50% -50%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.85;
+}
+
+.visor-mira circle {
+  fill: currentColor;
+}
+
+.visor-cabecalho {
+  position: absolute;
+  top: 96px;
+  left: 50%;
+  translate: -50% 0;
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.9);
+}
+
+.visor-rec {
+  color: #f87171;
+  animation: piscar 1.2s steps(2, start) infinite;
+}
+
+@keyframes piscar {
+  to {
+    visibility: hidden;
+  }
+}
+
+.visor-dados {
+  position: absolute;
+  bottom: 24px;
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 3px 14px;
+  margin: 0;
+  font-size: 13px;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.9);
+}
+
+.visor-dados dt {
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 11px;
+  align-self: center;
+}
+
+.visor-dados dd {
+  margin: 0;
+}
+
+.visor-esquerda {
+  left: 24px;
+}
+
+.visor-direita {
+  right: 24px;
+  bottom: 64px;
+}
+
+.visor-direita dd {
+  text-align: right;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .visor-rec {
+    animation: none;
+  }
 }
 
 /* Celular: o painel vira uma gaveta no rodapé. */
@@ -382,7 +552,13 @@ button:focus-visible,
     width: auto;
   }
 
-  .creditos {
+  .creditos,
+  .visor-dados {
     display: none;
+  }
+
+  .visor-cabecalho {
+    top: 64px;
+    font-size: 11px;
   }
 }

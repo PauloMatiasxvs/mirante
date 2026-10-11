@@ -4,22 +4,20 @@
 // em vez da API diretamente. Funciona tanto no servidor local (server.mjs)
 // quanto como função serverless na Vercel.
 
-// Centros de busca que cobrem o Brasil (raio de 250 milhas náuticas cada).
+// Centros de busca (raio de 250 milhas náuticas, ~460 km, cada). A maior parte
+// da cobertura de receptores no Brasil está no Sudeste: o primeiro círculo pega
+// São Paulo, Rio, Belo Horizonte e Curitiba; os outros, Centro-Oeste e Ceará.
 const REGIOES = [
-  { nome: 'São Paulo', lat: -23.5, lon: -46.6 },
-  { nome: 'Belo Horizonte', lat: -19.9, lon: -43.9 },
+  { nome: 'Sudeste', lat: -22.8, lon: -45.5 },
   { nome: 'Brasília', lat: -15.8, lon: -47.9 },
-  { nome: 'Porto Alegre', lat: -30.0, lon: -51.2 },
-  { nome: 'Salvador', lat: -12.97, lon: -38.5 },
-  { nome: 'Recife', lat: -8.1, lon: -34.9 },
-  { nome: 'Manaus', lat: -3.1, lon: -60.0 },
+  { nome: 'Fortaleza', lat: -3.78, lon: -38.53 },
 ];
 
-// A API é gratuita, comunitária e limita a ~1 consulta por segundo. Por isso as
+// A API é gratuita, comunitária e corta quem consulta demais. Por isso as
 // regiões são consultadas uma de cada vez, e o resultado fica guardado para
 // que vários visitantes não multipliquem as consultas.
 const CACHE_MS = 45_000;
-const PAUSA_ENTRE_REGIOES_MS = 1_500;
+const PAUSA_ENTRE_REGIOES_MS = 2_000;
 const ESPERA_APOS_LIMITE_MS = 60_000;
 const TIMEOUT_MS = 10_000;
 

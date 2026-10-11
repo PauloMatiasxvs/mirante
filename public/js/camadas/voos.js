@@ -1,13 +1,13 @@
 // Camada de voos: aviões ao vivo sobre o Brasil, vindos do adsb.lol via /api/flights.
 
 import { numero } from '../formatos.js';
+import { projetar } from '../geo.js';
 
 const { Cesium } = window;
 
 const INTERVALO_MS = 30_000;
 const PES_EM_METROS = 0.3048;
 const NOS_EM_MS = 0.514444;
-const RAIO_TERRA_M = 6_371_000;
 // Por quanto tempo o avião segue "voando" sozinho entre uma atualização e outra.
 const PROJECAO_S = 180;
 
@@ -49,28 +49,14 @@ const ICONE =
       '</svg>',
   );
 
-// Ponto de chegada após percorrer `distancia` metros no `rumo` (graus).
-function projetar(lat, lon, rumo, distancia) {
-  const angulo = distancia / RAIO_TERRA_M;
-  const direcao = Cesium.Math.toRadians(rumo);
-  const lat1 = Cesium.Math.toRadians(lat);
-  const lon1 = Cesium.Math.toRadians(lon);
-  const lat2 = Math.asin(
-    Math.sin(lat1) * Math.cos(angulo) +
-      Math.cos(lat1) * Math.sin(angulo) * Math.cos(direcao),
-  );
-  const lon2 =
-    lon1 +
-    Math.atan2(
-      Math.sin(direcao) * Math.sin(angulo) * Math.cos(lat1),
-      Math.cos(angulo) - Math.sin(lat1) * Math.sin(lat2),
-    );
-  return { lat: Cesium.Math.toDegrees(lat2), lon: Cesium.Math.toDegrees(lon2) };
+function altitudeEmMetros(voo) {
+  if (voo.onGround) return 0;
+  return Math.max(30, (voo.altitudeFt ?? 0) * PES_EM_METROS);
 }
 
-function altitudeEmMetros(voo) {
-  if (voo.onGround) return 30;
-  return Math.max(30, (voo.altitudeFt ?? 0) * PES_EM_METROS);
+// Avião no chão fica colado ao relevo; no ar, usa a altitude informada.
+function referenciaDeAltura(voo) {
+  return voo.onGround ? Cesium.HeightReference.CLAMP_TO_GROUND : Cesium.HeightReference.NONE;
 }
 
 // Posição que se move sozinha: do último ponto conhecido até onde o avião
@@ -116,9 +102,13 @@ export function criarCamadaVoos(viewer, aoAtualizar) {
       const rotation = -Cesium.Math.toRadians(voo.track ?? 0);
       const existente = fonte.entities.getById(id);
 
+      const heightReference = referenciaDeAltura(voo);
+
       if (existente) {
         existente.position = position;
         existente.billboard.rotation = rotation;
+        existente.billboard.heightReference = heightReference;
+        existente.label.heightReference = heightReference;
         existente.label.text = nomeDoVoo(voo);
         continue;
       }
@@ -128,6 +118,7 @@ export function criarCamadaVoos(viewer, aoAtualizar) {
         position,
         billboard: {
           image: ICONE,
+          heightReference,
           rotation,
           alignedAxis: Cesium.Cartesian3.UNIT_Z,
           scale: 0.5,
@@ -135,6 +126,7 @@ export function criarCamadaVoos(viewer, aoAtualizar) {
         },
         label: {
           text: nomeDoVoo(voo),
+          heightReference,
           font: '600 12px "JetBrains Mono", monospace',
           fillColor: Cesium.Color.fromCssColorString('#e0f2fe'),
           outlineColor: Cesium.Color.BLACK,

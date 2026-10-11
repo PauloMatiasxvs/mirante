@@ -1,11 +1,29 @@
 import { criarCamadaVoos } from './camadas/voos.js';
 import { criarCamadaTerremotos } from './camadas/terremotos.js';
 import { criarCamadaSatelites } from './camadas/satelites.js';
+import { criarCamadaPredios } from './camadas/predios.js';
 import { aplicarModo } from './modos.js';
+import { criarVisor } from './visor.js';
 import { mostrarFicha, esconderFicha } from './ficha.js';
 import { numero } from './formatos.js';
+import { projetar } from './geo.js';
+import { CIDADES } from './cidades.js';
 
 const { Cesium } = window;
+
+// Relevo do mundo todo, também da Esri e também sem chave.
+const relevo = new Cesium.Terrain(
+  Cesium.ArcGISTiledElevationTerrainProvider.fromUrl(
+    'https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer',
+  ),
+);
+const terrenoPronto = new Promise((resolver) => {
+  relevo.readyEvent.addEventListener(() => resolver());
+  relevo.errorEvent.addEventListener((erro) => {
+    console.warn('Relevo indisponível, seguindo sem ele:', erro);
+    resolver();
+  });
+});
 
 // Imagens de satélite da Esri: não exigem chave de API (somente atribuição).
 const imagens = new Cesium.UrlTemplateImageryProvider({
@@ -20,7 +38,7 @@ const nomesDeLugares = new Cesium.UrlTemplateImageryProvider({
 
 const viewer = new Cesium.Viewer('globo', {
   baseLayer: new Cesium.ImageryLayer(imagens),
-  terrainProvider: new Cesium.EllipsoidTerrainProvider(),
+  terrain: relevo,
   animation: false,
   timeline: false,
   baseLayerPicker: false,
@@ -34,22 +52,73 @@ const viewer = new Cesium.Viewer('globo', {
   creditContainer: 'creditos-cesium',
 });
 viewer.imageryLayers.addImageryProvider(nomesDeLugares);
-viewer.scene.globe.showGroundAtmosphere = true;
-viewer.scene.postProcessStages.fxaa.enabled = true;
+const { scene } = viewer;
+scene.globe.showGroundAtmosphere = true;
+scene.globe.depthTestAgainstTerrain = true;
+scene.globe.enableLighting = true;
+scene.postProcessStages.fxaa.enabled = true;
 // O relógio do globo segue a hora real, para aviões e satélites andarem ao vivo.
 viewer.clock.clockStep = Cesium.ClockStep.SYSTEM_CLOCK;
 viewer.clock.shouldAnimate = true;
 
+// ---------- Luz e sombras ----------
+
+// Uma luz "de estúdio" que acompanha a câmera, vinda do noroeste e do alto:
+// relevo e prédios ficam com volume e bem iluminados a qualquer hora do dia.
+const luz = new Cesium.DirectionalLight({ direction: Cesium.Cartesian3.UNIT_Z, intensity: 2.2 });
+scene.light = luz;
+const DIRECAO_LOCAL_DA_LUZ = Cesium.Cartesian3.normalize(
+  new Cesium.Cartesian3(0.5, -0.45, -0.74),
+  new Cesium.Cartesian3(),
+);
+const referencialLocal = new Cesium.Matrix4();
+scene.preRender.addEventListener(() => {
+  Cesium.Transforms.eastNorthUpToFixedFrame(viewer.camera.positionWC, undefined, referencialLocal);
+  Cesium.Matrix4.multiplyByPointAsVector(referencialLocal, DIRECAO_LOCAL_DA_LUZ, luz.direction);
+  Cesium.Cartesian3.normalize(luz.direction, luz.direction);
+});
+
+// Sombras só de perto, onde fazem diferença e não pesam no desempenho.
+viewer.shadowMap.softShadows = true;
+viewer.shadowMap.darkness = 0.35;
+viewer.shadowMap.maximumDistance = 6_000;
+viewer.terrainShadows = Cesium.ShadowMode.RECEIVE_ONLY;
+viewer.camera.changed.addEventListener(() => {
+  viewer.shadows = viewer.camera.positionCartographic.height < 12_000;
+});
+
 // ---------- Câmera ----------
 
-function voarPara(lon, lat, altura, inclinacao = -90) {
+function voarPara(lon, lat, altura) {
   viewer.trackedEntity = undefined;
-  // Recua a câmera para o sul, para olhar o alvo de frente quando inclinada.
-  const recuo = inclinacao <= -89 ? 0 : altura / Math.tan(Cesium.Math.toRadians(-inclinacao));
   viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(lon, lat - recuo / 111_320, altura),
-    orientation: { heading: 0, pitch: Cesium.Math.toRadians(inclinacao), roll: 0 },
+    destination: Cesium.Cartesian3.fromDegrees(lon, lat, altura),
     duration: 2.5,
+  });
+}
+
+// Voo baixo e inclinado, olhando para o ponto de destaque da cidade.
+async function voarParaCidade(chave) {
+  const { alvo, vista } = CIDADES[chave];
+  viewer.trackedEntity = undefined;
+  camadas.predios.carregar(chave);
+
+  await terrenoPronto;
+  const [solo] = await Cesium.sampleTerrain(scene.terrainProvider, 12, [
+    Cesium.Cartographic.fromDegrees(alvo.lon, alvo.lat),
+  ]).catch(() => [{ height: 0 }]);
+  const chao = Number.isFinite(solo?.height) ? solo.height : 0;
+
+  const recuo = vista.altura / Math.tan(Cesium.Math.toRadians(-vista.inclinacao));
+  const camera = projetar(alvo.lat, alvo.lon, (vista.rumo + 180) % 360, recuo);
+  viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(camera.lon, camera.lat, chao + vista.altura),
+    orientation: {
+      heading: Cesium.Math.toRadians(vista.rumo),
+      pitch: Cesium.Math.toRadians(vista.inclinacao),
+      roll: 0,
+    },
+    duration: 3,
   });
 }
 
@@ -62,7 +131,7 @@ viewer.camera.setView({
 function aoAtualizar(nome) {
   return ({ total, erro }) => {
     const contagem = document.getElementById(`conta-${nome}`);
-    contagem.textContent = erro ? 'offline' : numero(total);
+    contagem.textContent = erro ? 'offline' : total ? numero(total) : '—';
     contagem.classList.toggle('erro', Boolean(erro));
     contagem.title = erro ? 'Fonte indisponível no momento' : `Atualizado às ${new Date().toLocaleTimeString('pt-BR')}`;
   };
@@ -72,6 +141,7 @@ const camadas = {
   voos: criarCamadaVoos(viewer, aoAtualizar('voos')),
   terremotos: criarCamadaTerremotos(viewer, aoAtualizar('terremotos')),
   satelites: criarCamadaSatelites(viewer, aoAtualizar('satelites')),
+  predios: criarCamadaPredios(viewer, terrenoPronto, aoAtualizar('predios')),
 };
 
 for (const rotulo of document.querySelectorAll('.camada')) {
@@ -104,9 +174,10 @@ document.getElementById('fechar-ficha').addEventListener('click', () => {
 
 const destinos = {
   brasil: () => voarPara(-52, -15, 7_500_000),
-  saopaulo: () => voarPara(-46.55, -23.55, 90_000, -40),
-  rio: () => voarPara(-43.2, -22.9, 70_000, -40),
   planeta: () => voarPara(-35, -5, 22_000_000),
+  saopaulo: () => voarParaCidade('saopaulo'),
+  rio: () => voarParaCidade('rio'),
+  fortaleza: () => voarParaCidade('fortaleza'),
   iss: () => camadas.satelites.seguirISS(),
 };
 
@@ -122,6 +193,15 @@ for (const botao of document.querySelectorAll('[data-modo]')) {
     }
   });
 }
+
+const visor = criarVisor(viewer);
+visor.alternar(true);
+const botaoVisor = document.getElementById('alternar-visor');
+botaoVisor.addEventListener('click', () => {
+  const ligado = visor.alternar();
+  botaoVisor.classList.toggle('ativo', ligado);
+  botaoVisor.setAttribute('aria-pressed', String(ligado));
+});
 
 const painel = document.getElementById('painel');
 const alternar = document.getElementById('painel-alternar');
@@ -154,4 +234,4 @@ atualizarRelogio();
 setInterval(atualizarRelogio, 1000);
 
 // Útil para depurar no console do navegador.
-window.mirante = { viewer, camadas, destinos };
+window.mirante = { viewer, camadas, destinos, visor };

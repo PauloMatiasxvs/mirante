@@ -26,6 +26,40 @@
     <div id="globo"></div>
     <div class="vinheta" aria-hidden="true"></div>
 
+    <div class="visor" id="visor" hidden>
+      <svg class="visor-bussola" id="visor-bussola" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
+      <svg class="visor-mira" viewBox="-60 -60 120 120" aria-hidden="true">
+        <path d="M-60 0H-14M14 0H60M0-60V-14M0 14V60" />
+        <path d="M-32-24V-32H-24M24-32H32V-24M32 24V32H24M-24 32H-32V24" />
+        <circle r="2.5" />
+      </svg>
+      <p class="visor-cabecalho">
+        <span class="visor-rec">● REC</span>
+        <span data-campo="rec">--:--:--Z</span>
+        <span>· MIRANTE-1 · SENSOR ÓPTICO</span>
+      </p>
+      <dl class="visor-dados visor-esquerda">
+        <dt>Alvo</dt>
+        <dd data-campo="alvo">—</dd>
+        <dt>Solo</dt>
+        <dd data-campo="solo">—</dd>
+        <dt>Altitude</dt>
+        <dd data-campo="altitude">—</dd>
+        <dt>Distância</dt>
+        <dd data-campo="distancia">—</dd>
+      </dl>
+      <dl class="visor-dados visor-direita">
+        <dt>Rumo</dt>
+        <dd data-campo="rumo">—</dd>
+        <dt>Inclinação</dt>
+        <dd data-campo="inclinacao">—</dd>
+        <dt>Resolução</dt>
+        <dd data-campo="resolucao">—</dd>
+        <dt>Sol</dt>
+        <dd data-campo="sol">—</dd>
+      </dl>
+    </div>
+
     <header class="topo">
       <div class="marca">
         <img src="img/icone.svg" alt="" width="36" height="36" />
@@ -66,16 +100,23 @@
             <span class="nome">Satélites e estações</span>
             <span class="contagem" id="conta-satelites">…</span>
           </label>
+          <label class="camada" data-camada="predios">
+            <input type="checkbox" checked />
+            <span class="ponto"></span>
+            <span class="nome">Prédios em 3D</span>
+            <span class="contagem" id="conta-predios">…</span>
+          </label>
         </section>
 
         <section>
           <h2>Ir para</h2>
           <div class="botoes">
             <button type="button" data-destino="brasil">Brasil</button>
+            <button type="button" data-destino="planeta">Planeta</button>
             <button type="button" data-destino="saopaulo">São Paulo</button>
             <button type="button" data-destino="rio">Rio de Janeiro</button>
-            <button type="button" data-destino="planeta">Planeta</button>
-            <button type="button" data-destino="iss" class="largo">Seguir a ISS</button>
+            <button type="button" data-destino="fortaleza">Fortaleza</button>
+            <button type="button" data-destino="iss">Seguir a ISS</button>
           </div>
         </section>
 
@@ -85,6 +126,9 @@
             <button type="button" data-modo="normal" class="ativo">Normal</button>
             <button type="button" data-modo="noturna">Noturna</button>
             <button type="button" data-modo="termica">Térmica</button>
+            <button type="button" id="alternar-visor" class="largo ativo" aria-pressed="true">
+              Visor de satélite
+            </button>
           </div>
         </section>
       </div>
@@ -102,7 +146,9 @@
       <span>
         Dados: <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a> ·
         <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener">USGS</a> ·
-        <a href="https://celestrak.org" target="_blank" rel="noopener">CelesTrak</a> · imagens Esri
+        <a href="https://celestrak.org" target="_blank" rel="noopener">CelesTrak</a> · prédios
+        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
+        · imagens e relevo Esri
       </span>
       <div id="creditos-cesium"></div>
     </footer>

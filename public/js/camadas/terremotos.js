@@ -25,7 +25,8 @@ function pulso(magnitude, cor) {
   return {
     semiMajorAxis: raio,
     semiMinorAxis: raio,
-    height: 0,
+    // Acima da maior parte do relevo, para a onda não sumir sob as montanhas.
+    height: 4_000,
     material: new Cesium.ColorMaterialProperty(
       new Cesium.CallbackProperty((tempo) => cor.withAlpha(0.5 * (1 - fase(tempo))), false),
     ),
@@ -58,6 +59,7 @@ export function criarCamadaTerremotos(viewer, aoAtualizar) {
           id,
           position: Cesium.Cartesian3.fromDegrees(lon, lat, 1_500),
           point: {
+            heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
             pixelSize: Math.max(6, 4 + magnitude * 3),
             color: cor.withAlpha(0.92),
             outlineColor: Cesium.Color.WHITE.withAlpha(0.85),
@@ -66,6 +68,7 @@ export function criarCamadaTerremotos(viewer, aoAtualizar) {
           label:
             magnitude >= 4
               ? {
+                  heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
                   text: `M${magnitude.toFixed(1)}`,
                   font: '600 12px "JetBrains Mono", monospace',
                   fillColor: Cesium.Color.WHITE,
