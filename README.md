@@ -52,11 +52,12 @@ public/                 site estático (HTML, CSS e JavaScript puro)
   js/main.js            monta o globo, a luz, as sombras e liga os controles
   js/camadas/           uma camada por fonte de dados (voos, terremotos, satélites, prédios)
   js/visor.js           visor de satélite e telemetria
+  js/mapa-base.js       nomes em português e fronteiras desenhados sobre o relevo
   js/modos.js           shaders de visão noturna e térmica
   js/cidades.js         cidades em 3D: área dos prédios e ângulo de câmera
   dados/                prédios de cada cidade, já processados
 api/flights.js          rota que busca os voos (o adsb.lol não libera CORS)
-scripts/                baixar-predios.mjs atualiza os prédios a partir do OpenStreetMap
+scripts/                atualizam os prédios (OpenStreetMap) e os nomes e fronteiras (Natural Earth)
 server.mjs              servidor local sem dependências
 ```
 
@@ -80,6 +81,7 @@ site e `api/flights.js` vira uma função serverless. Basta importar o repositó
 | Órbitas | [CelesTrak](https://celestrak.org) | Elementos orbitais (TLE), guardados em cache por 2 h |
 | Prédios | [OpenStreetMap](https://www.openstreetmap.org/copyright) | © colaboradores do OpenStreetMap, sob ODbL |
 | Imagens | [Esri World Imagery](https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9) | Imagens de satélite com atribuição |
+| Nomes e fronteiras | [Natural Earth](https://www.naturalearthdata.com) | Domínio público; nomes de países, cidades e mares em português |
 | Relevo | [Esri World Elevation 3D](https://www.arcgis.com/home/item.html?id=7029fb60158543ad845c7e1527af11e4) | Modelo de elevação global |
 
 A cobertura de voos depende dos receptores voluntários de cada região: é maior no

@@ -8,6 +8,7 @@ import { mostrarFicha, esconderFicha } from './ficha.js';
 import { numero } from './formatos.js';
 import { projetar } from './geo.js';
 import { CIDADES } from './cidades.js';
+import { criarMapaBase } from './mapa-base.js';
 
 const { Cesium } = window;
 
@@ -31,10 +32,6 @@ const imagens = new Cesium.UrlTemplateImageryProvider({
   maximumLevel: 19,
   credit: new Cesium.Credit('Imagens © Esri, Maxar, Earthstar Geographics'),
 });
-const nomesDeLugares = new Cesium.UrlTemplateImageryProvider({
-  url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-  maximumLevel: 19,
-});
 
 const viewer = new Cesium.Viewer('globo', {
   baseLayer: new Cesium.ImageryLayer(imagens),
@@ -51,8 +48,17 @@ const viewer = new Cesium.Viewer('globo', {
   selectionIndicator: false,
   creditContainer: 'creditos-cesium',
 });
-viewer.imageryLayers.addImageryProvider(nomesDeLugares);
 const { scene } = viewer;
+criarMapaBase(viewer).catch((erro) => console.warn('Nomes e fronteiras indisponíveis:', erro));
+
+// Textos fixos do Cesium, em português.
+for (const [seletor, texto] of [
+  ['.cesium-credit-expand-link', 'Créditos'],
+  ['.cesium-credit-lightbox-title', 'Dados fornecidos por:'],
+]) {
+  const elemento = document.querySelector(seletor);
+  if (elemento) elemento.textContent = texto;
+}
 scene.globe.showGroundAtmosphere = true;
 // Cor de fundo enquanto as imagens de satélite carregam (o padrão é um azul forte).
 scene.globe.baseColor = Cesium.Color.fromCssColorString('#0b1422');

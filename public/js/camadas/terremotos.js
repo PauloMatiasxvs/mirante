@@ -1,6 +1,7 @@
 // Camada de terremotos: todos os sismos das últimas 24 horas, segundo o USGS.
 
 import { numero, dataHora, haQuanto } from '../formatos.js';
+import { traduzirLocalDoSismo } from '../traducao.js';
 
 const { Cesium } = window;
 
@@ -104,7 +105,7 @@ export function criarCamadaTerremotos(viewer, aoAtualizar) {
         tipo: 'Terremoto',
         titulo: `Magnitude ${(mag ?? 0).toFixed(1)}`,
         linhas: [
-          ['Local', place ?? '—'],
+          ['Local', traduzirLocalDoSismo(place)],
           ['Quando', haQuanto(time)],
           ['Horário', dataHora(time)],
           ['Profundidade', profundidade != null ? `${numero(profundidade)} km` : '—'],
