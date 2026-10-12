@@ -16,9 +16,9 @@ export interface Telemetry {
   } | null;
 }
 
-const INTERVAL_MS = 100;
+const INTERVAL_MS = 200;
 
-/** Samples what the camera is looking at, ~10 times per second, while enabled. */
+/** Samples what the camera is looking at, ~5 times per second, while enabled. */
 export function createTelemetry(viewer: Viewer, onChange: (telemetry: Telemetry | null) => void) {
   const center = new Cartesian2();
   let enabled = false;

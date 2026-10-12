@@ -1,3 +1,4 @@
+import { useClock } from '../hooks/useClock';
 import { useMapState } from '../hooks/useMap';
 import { formatDecimal, formatDistance, formatDms, formatGroundResolution, formatInt } from '../lib/format';
 import { normalizeDegrees } from '../lib/geo';
@@ -52,6 +53,7 @@ function Readout({ items }: { items: Array<[string, string]> }) {
 }
 
 export function Visor() {
+  const now = useClock();
   const visor = useMapState((state) => state.visor);
   const inCockpit = useMapState((state) => state.cockpit !== null);
   const telemetry = useMapState((state) => state.telemetry);
@@ -76,7 +78,7 @@ export function Visor() {
         <circle r={2} />
       </svg>
       <p className="visor__header">
-        <span className="visor__rec">●</span> REC {utc.format(new Date())}Z
+        <span className="visor__rec">●</span> REC {utc.format(now)}Z
       </p>
       <dl className="visor__data visor__data--left">
         <Readout

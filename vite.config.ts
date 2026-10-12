@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig, type Connect, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
@@ -25,6 +26,16 @@ export default defineConfig({
   define: {
     CESIUM_BASE_URL: JSON.stringify(`/${cesiumBaseUrl}`),
   },
+  resolve: {
+    alias: [
+      // The package's default entry is the unbuilt source, which keeps ~2000
+      // debug-only argument checks in hot paths. The prebuilt bundle strips them.
+      {
+        find: /^cesium$/,
+        replacement: fileURLToPath(new URL(`./${cesiumSource}/index.js`, import.meta.url)),
+      },
+    ],
+  },
   plugins: [
     react(),
     viteStaticCopy({
@@ -37,7 +48,14 @@ export default defineConfig({
     }),
     localApi(),
   ],
+  build: {
+    // Cesium alone is ~4.8 MB minified (~1.4 MB gzipped).
+    chunkSizeWarningLimit: 5_500,
+  },
   server: {
+    port: 5180,
+  },
+  preview: {
     port: 5180,
   },
 });

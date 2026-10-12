@@ -10,7 +10,6 @@ import {
   Math as CesiumMath,
   Matrix4,
   sampleTerrain,
-  ShadowMode,
   Terrain,
   Transforms,
   UrlTemplateImageryProvider,
@@ -31,7 +30,7 @@ import { createVisionModes } from './visionModes';
 
 const IMAGERY_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
 const ELEVATION_URL = 'https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer';
-const SHADOW_MAX_HEIGHT_M = 12_000;
+const IDLE_FRAME_S = 0.1;
 // Studio light that follows the camera, from the northwest and above, so
 // terrain and buildings read well at any hour (east, north, up).
 const LIGHT_DIRECTION_ENU = Cartesian3.normalize(new Cartesian3(0.5, -0.45, -0.74), new Cartesian3());
@@ -46,6 +45,7 @@ export interface MapState {
 }
 
 export interface MapEngine {
+  viewer: Viewer;
   store: Store<MapState>;
   cockpit: CockpitController;
   goTo(destination: Destination): void;
@@ -103,6 +103,10 @@ export function createMapEngine({
     infoBox: false,
     selectionIndicator: false,
     creditContainer,
+    // Only redraw when something changes; the live clock still advances
+    // moving objects every IDLE_FRAME_S.
+    requestRenderMode: true,
+    maximumRenderTimeChange: IDLE_FRAME_S,
   });
 
   const { scene, camera } = viewer;
@@ -110,6 +114,9 @@ export function createMapEngine({
   scene.globe.showGroundAtmosphere = true;
   scene.globe.depthTestAgainstTerrain = true;
   scene.globe.enableLighting = true;
+  // Slightly coarser tiles than the default (2): far fewer requests, barely visible.
+  scene.globe.maximumScreenSpaceError = 2.5;
+  scene.globe.tileCacheSize = 300;
   scene.postProcessStages.fxaa.enabled = true;
   // The scene clock follows real time so planes and satellites move live.
   viewer.clock.clockStep = ClockStep.SYSTEM_CLOCK;
@@ -123,14 +130,6 @@ export function createMapEngine({
     Transforms.eastNorthUpToFixedFrame(camera.positionWC, undefined, enu);
     Matrix4.multiplyByPointAsVector(enu, LIGHT_DIRECTION_ENU, light.direction);
     Cartesian3.normalize(light.direction, light.direction);
-  });
-
-  viewer.shadowMap.softShadows = true;
-  viewer.shadowMap.darkness = 0.35;
-  viewer.shadowMap.maximumDistance = 6_000;
-  viewer.terrainShadows = ShadowMode.RECEIVE_ONLY;
-  const removeShadowListener = camera.changed.addEventListener(() => {
-    viewer.shadows = camera.positionCartographic.height < SHADOW_MAX_HEIGHT_M;
   });
 
   // Cesium's own UI strings, in Portuguese.
@@ -155,6 +154,11 @@ export function createMapEngine({
   ];
 
   const cockpit = new CockpitController(viewer, flights, (state) => store.set({ cockpit: state }));
+  // Render continuously only while the camera rides something that moves
+  // (the cockpit toggles this itself).
+  const removeTrackingListener = viewer.trackedEntityChanged.addEventListener(() => {
+    scene.requestRenderMode = !cockpit.active && !viewer.trackedEntity;
+  });
   const visionModes = createVisionModes(viewer);
   const telemetry = createTelemetry(viewer, (value) => store.set({ telemetry: value }));
   telemetry.setEnabled(true);
@@ -198,6 +202,7 @@ export function createMapEngine({
   }
 
   return {
+    viewer,
     store,
     cockpit,
     goTo(dest) {
@@ -230,7 +235,7 @@ export function createMapEngine({
       window.clearInterval(selectionTimer);
       removeSelectionListener();
       removeLightListener();
-      removeShadowListener();
+      removeTrackingListener();
       telemetry.destroy();
       cockpit.destroy();
       layers.forEach((layer) => layer.destroy());

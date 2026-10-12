@@ -74,6 +74,7 @@ export class CockpitController {
     this.viewer.trackedEntity = undefined;
     this.viewer.selectedEntity = undefined;
     this.viewer.scene.screenSpaceCameraController.enableInputs = false;
+    this.viewer.scene.requestRenderMode = false;
     return true;
   }
 
@@ -84,6 +85,7 @@ export class CockpitController {
     this.target = null;
     this.history = [];
     this.viewer.scene.screenSpaceCameraController.enableInputs = true;
+    this.viewer.scene.requestRenderMode = true;
     if (last) {
       this.viewer.camera.flyTo({
         destination: Cartesian3.fromRadians(last.longitude, last.latitude, 60_000),

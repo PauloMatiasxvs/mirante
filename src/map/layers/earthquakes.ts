@@ -3,7 +3,6 @@ import {
   Cartesian2,
   Cartesian3,
   Color,
-  ColorMaterialProperty,
   CustomDataSource,
   HeightReference,
   JulianDate,
@@ -32,21 +31,22 @@ function magnitudeColor(magnitude: number) {
   return Color.fromCssColorString('#facc15');
 }
 
-// Expanding ring on stronger quakes. Both axes read the same clock time, so
-// the ellipse can never end up with minor > major mid-frame.
+const RING = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">' +
+    '<circle cx="32" cy="32" r="28" fill="none" stroke="white" stroke-width="3"/></svg>',
+)}`;
+
+// Expanding ring on stronger quakes. A billboard only changes scale and
+// color per frame, unlike an animated ellipse that rebuilds its geometry.
 function pulse(magnitude: number, color: Color, epoch: JulianDate) {
-  const maxRadius = 40_000 + magnitude * 35_000;
+  const maxScale = 0.6 + magnitude * 0.18;
   const phase = (time?: JulianDate) =>
     (JulianDate.secondsDifference(time ?? JulianDate.now(), epoch) / PULSE_PERIOD_S) % 1;
-  const radius = new CallbackProperty((time) => 1_000 + phase(time) * maxRadius, false);
   return {
-    semiMajorAxis: radius,
-    semiMinorAxis: radius,
-    // Above most terrain, so the ring doesn't vanish under mountains.
-    height: 4_000,
-    material: new ColorMaterialProperty(
-      new CallbackProperty((time) => color.withAlpha(0.5 * (1 - phase(time))), false),
-    ),
+    image: RING,
+    heightReference: HeightReference.RELATIVE_TO_GROUND,
+    scale: new CallbackProperty((time) => 0.2 + phase(time) * maxScale, false),
+    color: new CallbackProperty((time) => color.withAlpha(0.85 * (1 - phase(time))), false),
   };
 }
 
@@ -97,7 +97,7 @@ export function createEarthquakesLayer(viewer: Viewer, onStatus: (status: LayerS
                   pixelOffset: new Cartesian2(0, -18),
                 }
               : undefined,
-          ellipse: magnitude >= 4.5 ? pulse(magnitude, color, epoch) : undefined,
+          billboard: magnitude >= 4.5 ? pulse(magnitude, color, epoch) : undefined,
         });
       }
       entities.resumeEvents();

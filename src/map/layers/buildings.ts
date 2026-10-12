@@ -11,7 +11,6 @@ import {
   Primitive,
   PrimitiveCollection,
   sampleTerrain,
-  ShadowMode,
   type TerrainProvider,
   type Viewer,
 } from 'cesium';
@@ -92,7 +91,6 @@ export function createBuildingsLayer(
             }),
         ),
         appearance: new PerInstanceColorAppearance({ translucent: false, closed: true }),
-        shadows: ShadowMode.ENABLED,
       }),
     );
     total += buildings.length;
