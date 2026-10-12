@@ -2,18 +2,24 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig, type Connect, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
-import flightsHandler from './api/flights.ts';
+import flights from './api/flights.ts';
+import military from './api/military.ts';
+import world from './api/world.ts';
 
 const cesiumSource = 'node_modules/cesium/Build/Cesium';
 const cesiumBaseUrl = 'cesium';
 
-// Mounts the serverless function on the dev and preview servers, so the app
+const API_ROUTES = { '/api/flights': flights, '/api/military': military, '/api/world': world };
+
+// Mounts the serverless functions on the dev and preview servers, so the app
 // runs locally without the Vercel CLI.
 function localApi(): Plugin {
   const mount = (server: { middlewares: Connect.Server }) => {
-    server.middlewares.use('/api/flights', (req, res) => {
-      void flightsHandler(req, res);
-    });
+    for (const [path, handler] of Object.entries(API_ROUTES)) {
+      server.middlewares.use(path, (req, res) => {
+        void handler(req, res);
+      });
+    }
   };
   return {
     name: 'local-api',

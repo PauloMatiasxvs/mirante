@@ -1,0 +1,36 @@
+.right-rail {
+  position: fixed;
+  z-index: 2;
+  top: 104px;
+  right: var(--gutter);
+  bottom: 130px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 280px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  pointer-events: none;
+}
+
+.right-rail > * {
+  flex: none;
+  pointer-events: auto;
+}
+
+.in-cockpit .right-rail {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .right-rail {
+    top: auto;
+    left: var(--gutter);
+    bottom: 70px;
+    width: auto;
+  }
+
+  .right-rail .traffic {
+    display: none;
+  }
+}

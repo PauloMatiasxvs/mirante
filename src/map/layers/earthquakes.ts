@@ -7,7 +7,6 @@ import {
   HeightReference,
   JulianDate,
   LabelStyle,
-  type Entity,
   type Viewer,
 } from 'cesium';
 import { formatBrasiliaTime, formatInt, timeAgo } from '../../lib/format';
@@ -114,12 +113,12 @@ export function createEarthquakesLayer(viewer: Viewer, onStatus: (status: LayerS
 
   return {
     id: 'earthquakes',
-    entityPrefix: PREFIX,
+    idPrefix: PREFIX,
     setVisible(visible) {
       dataSource.show = visible;
     },
-    describe(entity: Entity): InfoContent | null {
-      const quake = quakes.get(entity.id);
+    describe(id: string): InfoContent | null {
+      const quake = quakes.get(id);
       if (!quake) return null;
       const { mag, place, time, url } = quake.properties;
       const depth = quake.geometry.coordinates[2];

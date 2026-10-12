@@ -127,7 +127,7 @@ export function createBuildingsLayer(
 
   return {
     id: 'buildings',
-    entityPrefix: 'building-',
+    idPrefix: 'building-',
     load,
     setVisible(visible) {
       collection.show = visible;

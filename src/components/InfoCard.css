@@ -1,9 +1,5 @@
 .info-card {
-  position: fixed;
-  z-index: 2;
-  top: 104px;
-  right: var(--gutter);
-  width: 280px;
+  position: relative;
   padding: 14px 16px;
   background: var(--glass-strong);
   border: 1px solid var(--line);
@@ -101,16 +97,3 @@
   color: var(--text);
 }
 
-.in-cockpit .info-card {
-  display: none;
-}
-
-@media (max-width: 720px) {
-  .info-card {
-    top: auto;
-    bottom: 70px;
-    left: var(--gutter);
-    right: var(--gutter);
-    width: auto;
-  }
-}

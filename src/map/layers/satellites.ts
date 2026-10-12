@@ -10,7 +10,6 @@ import {
   LagrangePolynomialApproximation,
   PolylineGlowMaterialProperty,
   SampledPositionProperty,
-  type Entity,
   type Viewer,
 } from 'cesium';
 import {
@@ -219,7 +218,7 @@ export function createSatellitesLayer(viewer: Viewer, onStatus: (status: LayerSt
 
   return {
     id: 'satellites',
-    entityPrefix: PREFIX,
+    idPrefix: PREFIX,
     setVisible(visible) {
       dataSource.show = visible;
     },
@@ -230,8 +229,8 @@ export function createSatellitesLayer(viewer: Viewer, onStatus: (status: LayerSt
       viewer.selectedEntity = iss;
       return true;
     },
-    describe(entity: Entity): InfoContent | null {
-      const satellite = satellites.get(entity.id);
+    describe(id: string): InfoContent | null {
+      const satellite = satellites.get(id);
       const fix = satellite && fixAt(satellite.satrec, new Date());
       if (!satellite || !fix) return null;
       const station = STATIONS[satellite.norad];

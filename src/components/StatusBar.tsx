@@ -23,7 +23,9 @@ function counterLabel({ count, error }: LayerStatus) {
 }
 
 const COUNTERS: Array<{ id: LayerId; title: string }> = [
-  { id: 'flights', title: 'Voos' },
+  { id: 'flights', title: 'Voos no Brasil' },
+  { id: 'military', title: 'Voos militares' },
+  { id: 'world', title: 'Voos no mundo' },
   { id: 'earthquakes', title: 'Terremotos (24 h)' },
   { id: 'satellites', title: 'Satélites' },
   { id: 'buildings', title: 'Prédios em 3D' },

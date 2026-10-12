@@ -41,7 +41,7 @@ export function Dock() {
         ))}
         <DockButton
           active={inCockpit}
-          onClick={() => (engine.cockpit.active ? engine.cockpit.exit() : engine.cockpit.enterNearest())}
+          onClick={() => (engine.cockpit.active ? engine.cockpit.exit() : engine.enterCockpit())}
         >
           Cockpit
         </DockButton>

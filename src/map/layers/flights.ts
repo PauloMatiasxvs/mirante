@@ -12,10 +12,9 @@ import {
   Math as CesiumMath,
   NearFarScalar,
   SampledPositionProperty,
-  type Entity,
   type Viewer,
 } from 'cesium';
-import type { FlightsResponse } from '../../../api/flights';
+import type { FlightsResponse } from '../../../api/_lib/flight';
 import {
   aircraftModel,
   FEET_TO_METERS,
@@ -27,25 +26,23 @@ import {
 } from '../../lib/aircraft';
 import { formatInt } from '../../lib/format';
 import { destination } from '../../lib/geo';
-import type { InfoContent, LayerStatus, MapLayer } from '../types';
+import { planeIcon } from '../planeIcon';
+import type { FlightSource, InfoContent, LayerStatus, MapLayer } from '../types';
 
-const REFRESH_MS = 30_000;
 // Between updates each plane keeps moving on its last speed and track.
 const DEAD_RECKONING_S = 180;
-const PREFIX = 'flight-';
 
-const ICON = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">' +
-    '<path fill="#7dd3fc" stroke="#082f49" stroke-width="2.5" stroke-linejoin="round" ' +
-    'd="M32 4c2.5 0 4 3 4 7v13l22 13v5l-22-7v15l7 5v4l-11-3-11 3v-4l7-5V35l-22 7v-5l22-13V11c0-4 1.5-7 4-7z"/>' +
-    '</svg>',
-)}`;
-
-export interface FlightsLayer extends MapLayer {
-  readonly dataSource: CustomDataSource;
-  get(entityId: string): Flight | undefined;
-  airborne(): string[];
+export interface FlightsLayerOptions {
+  id: 'flights' | 'military';
+  endpoint: string;
+  idPrefix: string;
+  color: string;
+  /** Shown as the info card's kind, e.g. "Voo ao vivo". */
+  label: string;
+  refreshMs: number;
 }
+
+export type FlightsLayer = MapLayer & FlightSource;
 
 const altitudeMeters = (flight: Flight) =>
   flight.onGround ? 0 : Math.max(30, (flight.altitudeFt ?? 0) * FEET_TO_METERS);
@@ -72,17 +69,23 @@ function trackPosition(flight: Flight, at: JulianDate): SampledPositionProperty 
   return position;
 }
 
-function describeVertical(fpm: number | null): string {
+export function describeVertical(fpm: number | null): string {
   const trend = verticalTrend(fpm);
   if (trend === 'level') return 'Nivelado';
   return `${trend === 'climbing' ? 'Subindo' : 'Descendo'} ${formatInt(Math.abs(fpm ?? 0))} pés/min`;
 }
 
-export function createFlightsLayer(viewer: Viewer, onStatus: (status: LayerStatus) => void): FlightsLayer {
-  const dataSource = new CustomDataSource('flights');
+export function createFlightsLayer(
+  viewer: Viewer,
+  options: FlightsLayerOptions,
+  onStatus: (status: LayerStatus) => void,
+): FlightsLayer {
+  const { id: layerId, endpoint, idPrefix, color, label, refreshMs } = options;
+  const dataSource = new CustomDataSource(layerId);
   void viewer.dataSources.add(dataSource);
   const flights = new Map<string, Flight>();
   const abort = new AbortController();
+  const icon = planeIcon(color);
 
   function sync({ updatedAt, flights: incoming }: FlightsResponse) {
     const base = Date.parse(updatedAt) || Date.now();
@@ -91,7 +94,7 @@ export function createFlightsLayer(viewer: Viewer, onStatus: (status: LayerStatu
 
     entities.suspendEvents();
     for (const flight of incoming) {
-      const id = PREFIX + flight.id;
+      const id = idPrefix + flight.id;
       seen.add(id);
       flights.set(id, flight);
 
@@ -113,18 +116,18 @@ export function createFlightsLayer(viewer: Viewer, onStatus: (status: LayerStatu
         id,
         position,
         billboard: {
-          image: ICON,
+          image: icon,
           heightReference: reference,
           rotation,
           alignedAxis: Cartesian3.UNIT_Z,
-          scale: 0.5,
-          scaleByDistance: new NearFarScalar(2e4, 1.1, 8e6, 0.3),
+          scale: 0.55,
+          scaleByDistance: new NearFarScalar(2e4, 1.1, 8e6, 0.5),
         },
         label: {
           text: labelText(flight),
           heightReference: reference,
           font: '600 12px "JetBrains Mono", monospace',
-          fillColor: Color.fromCssColorString('#e0f2fe'),
+          fillColor: Color.fromCssColorString(color).brighten(0.4, new Color()),
           outlineColor: Color.BLACK,
           outlineWidth: 3,
           style: LabelStyle.FILL_AND_OUTLINE,
@@ -144,31 +147,36 @@ export function createFlightsLayer(viewer: Viewer, onStatus: (status: LayerStatu
 
   async function refresh() {
     try {
-      const response = await fetch('/api/flights', { signal: abort.signal });
+      const response = await fetch(endpoint, { signal: abort.signal });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       sync((await response.json()) as FlightsResponse);
       onStatus({ count: flights.size, error: false });
     } catch (error) {
       if (abort.signal.aborted) return;
-      console.warn('flights unavailable:', error);
+      console.warn(`${layerId} unavailable:`, error);
       onStatus({ count: flights.size || null, error: true });
     }
   }
 
   void refresh();
-  const timer = window.setInterval(refresh, REFRESH_MS);
+  const timer = window.setInterval(refresh, refreshMs);
 
   return {
-    id: 'flights',
-    entityPrefix: PREFIX,
-    dataSource,
+    id: layerId,
+    idPrefix,
+    kind: layerId === 'military' ? 'military' : 'flight',
     get: (id) => flights.get(id),
+    positionAt: (id, time) => dataSource.entities.getById(id)?.position?.getValue(time),
     airborne: () => [...flights].filter(([, flight]) => !flight.onGround).map(([id]) => id),
+    setPlaneVisible(id, visible) {
+      const entity = dataSource.entities.getById(id);
+      if (entity) entity.show = visible;
+    },
     setVisible(visible) {
       dataSource.show = visible;
     },
-    describe(entity: Entity): InfoContent | null {
-      const flight = flights.get(entity.id);
+    describe(id): InfoContent | null {
+      const flight = flights.get(id);
       if (!flight) return null;
       const altitude = flight.onGround
         ? 'No solo'
@@ -176,7 +184,7 @@ export function createFlightsLayer(viewer: Viewer, onStatus: (status: LayerStatu
           ? `${formatInt(flight.altitudeFt)} pés (${formatInt(flight.altitudeFt * FEET_TO_METERS)} m)`
           : '—';
       return {
-        kind: 'Voo ao vivo',
+        kind: label,
         title: flightName(flight),
         rows: [
           ['Aeronave', aircraftModel(flight) || '—'],
@@ -190,7 +198,7 @@ export function createFlightsLayer(viewer: Viewer, onStatus: (status: LayerStatu
           url: `https://globe.adsb.lol/?icao=${encodeURIComponent(flight.id)}`,
           label: 'Ver trajeto no adsb.lol ↗',
         },
-        cockpitTarget: flight.onGround ? undefined : entity.id,
+        cockpitTarget: flight.onGround ? undefined : id,
       };
     },
     destroy() {

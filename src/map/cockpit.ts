@@ -1,7 +1,7 @@
 import { Cartesian2, Cartesian3, Cartographic, Math as CesiumMath, type JulianDate, type Viewer } from 'cesium';
 import { aircraftModel, flightLevel, flightName } from '../lib/aircraft';
 import { normalizeDegrees } from '../lib/geo';
-import type { FlightsLayer } from './layers/flights';
+import type { FlightSource } from './types';
 
 const DEFAULT_PITCH = CesiumMath.toRadians(-6);
 const POSITION_SMOOTHING = 0.08;
@@ -17,6 +17,7 @@ export interface CockpitContact {
   name: string;
   distanceKm: number;
   level: string;
+  kind: FlightSource['kind'];
 }
 
 export interface CockpitState {
@@ -47,7 +48,7 @@ export class CockpitController {
 
   constructor(
     private readonly viewer: Viewer,
-    private readonly flights: FlightsLayer,
+    private readonly sources: FlightSource[],
     private readonly onChange: (state: CockpitState | null) => void,
   ) {
     this.removeRenderListener = viewer.scene.preRender.addEventListener((_, time) => this.update(time));
@@ -58,8 +59,8 @@ export class CockpitController {
   }
 
   enter(id: string, { remember = true } = {}): boolean {
-    const flight = this.flights.get(id);
-    if (!flight || flight.onGround || !this.flights.dataSource.entities.getById(id)) return false;
+    const flight = this.sourceOf(id)?.get(id);
+    if (!flight || flight.onGround || !this.positionOf(id, this.viewer.clock.currentTime)) return false;
     if (this.target) {
       if (remember) this.history.push(this.target);
       this.setPlaneVisible(this.target, true);
@@ -114,10 +115,9 @@ export class CockpitController {
     );
   }
 
-  /** Boards the selected flight or, with nothing selected, the one nearest the screen center. */
-  enterNearest(): boolean {
-    const selected = this.viewer.selectedEntity?.id;
-    if (selected?.startsWith(this.flights.entityPrefix) && this.enter(selected)) return true;
+  /** Boards the given flight or, failing that, the one nearest the screen center. */
+  enterNearest(preferredId?: string | null): boolean {
+    if (preferredId && this.sourceOf(preferredId) && this.enter(preferredId)) return true;
     const { scene, camera } = this.viewer;
     const ray = camera.getPickRay(new Cartesian2(scene.canvas.clientWidth / 2, scene.canvas.clientHeight / 2));
     const point = (ray && scene.globe.pick(ray, scene)) ?? camera.positionWC;
@@ -129,20 +129,31 @@ export class CockpitController {
     this.removeRenderListener();
   }
 
+  private sourceOf(id: string) {
+    return this.sources.find((source) => id.startsWith(source.idPrefix));
+  }
+
+  private flightOf(id: string) {
+    return this.sourceOf(id)?.get(id);
+  }
+
   private setPlaneVisible(id: string, visible: boolean) {
-    const entity = this.flights.dataSource.entities.getById(id);
-    if (entity) entity.show = visible;
+    this.sourceOf(id)?.setPlaneVisible(id, visible);
   }
 
   private positionOf(id: string, time: JulianDate) {
-    return this.flights.dataSource.entities.getById(id)?.position?.getValue(time);
+    return this.sourceOf(id)?.positionAt(id, time);
+  }
+
+  private airborne() {
+    return this.sources.flatMap((source) => source.airborne());
   }
 
   private nearestTo(point: Cartesian3, exclude?: string) {
     const time = this.viewer.clock.currentTime;
     let best: string | null = null;
     let bestDistance = Infinity;
-    for (const id of this.flights.airborne()) {
+    for (const id of this.airborne()) {
       const position = id !== exclude && this.positionOf(id, time);
       if (!position) continue;
       const distance = Cartesian3.distance(point, position);
@@ -156,7 +167,7 @@ export class CockpitController {
 
   private update(time: JulianDate) {
     if (!this.target) return;
-    const flight = this.flights.get(this.target);
+    const flight = this.flightOf(this.target);
     const position = flight && this.positionOf(this.target, time);
     if (!flight || !position) {
       // The plane left coverage: hop to the nearest one instead of dropping out.
@@ -193,21 +204,24 @@ export class CockpitController {
   private refreshContacts(time: JulianDate) {
     const here = this.smoothedPosition;
     if (!here) return;
-    this.contacts = this.flights
-      .airborne()
-      .filter((id) => id !== this.target)
-      .flatMap((id) => {
-        const position = this.positionOf(id, time);
-        const flight = this.flights.get(id);
-        return position && flight ? [{ id, flight, distance: Cartesian3.distance(here, position) }] : [];
+    this.contacts = this.sources
+      .flatMap((source) => source.airborne().map((id) => ({ id, source })))
+      .filter(({ id }) => id !== this.target)
+      .flatMap(({ id, source }) => {
+        const position = source.positionAt(id, time);
+        const flight = source.get(id);
+        return position && flight
+          ? [{ id, flight, kind: source.kind, distance: Cartesian3.distance(here, position) }]
+          : [];
       })
       .sort((a, b) => a.distance - b.distance)
       .slice(0, CONTACT_COUNT)
-      .map(({ id, flight, distance }) => ({
+      .map(({ id, flight, kind, distance }) => ({
         id,
         name: flightName(flight),
         distanceKm: distance / 1000,
         level: flightLevel(flight),
+        kind,
       }));
   }
 
@@ -219,11 +233,11 @@ export class CockpitController {
       this.lastContacts = now;
       this.refreshContacts(time);
     }
-    const flight = this.flights.get(this.target);
+    const flight = this.flightOf(this.target);
     if (!flight) return;
     this.onChange({
       callsign: flightName(flight),
-      model: aircraftModel(flight),
+      model: aircraftModel(flight) || flight.originCountry || '',
       speedKt: flight.speedKt,
       altitudeFt: flight.altitudeFt,
       verticalRateFpm: flight.verticalRateFpm,

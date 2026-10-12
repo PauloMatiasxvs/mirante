@@ -3,7 +3,7 @@ import { Brand } from './components/Brand';
 import { CockpitHud } from './components/CockpitHud';
 import { Dock } from './components/Dock';
 import { Globe } from './components/Globe';
-import { InfoCard } from './components/InfoCard';
+import { RightRail } from './components/RightRail';
 import { LayerDrawer } from './components/LayerDrawer';
 import { StatusBar } from './components/StatusBar';
 import { Visor } from './components/Visor';
@@ -33,7 +33,7 @@ export function App() {
           <CockpitHud />
           <StatusBar />
           <LayerDrawer />
-          <InfoCard />
+          <RightRail />
           <Dock />
         </>
       )}

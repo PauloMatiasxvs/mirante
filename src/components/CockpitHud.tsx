@@ -105,7 +105,9 @@ export function CockpitHud() {
           {state.contacts.map((contact) => (
             <li key={contact.id}>
               <button type="button" onClick={() => cockpit.enter(contact.id)}>
-                <b>{contact.name}</b>
+                <b>
+                  <i className={`dot dot--${contact.kind}`} /> {contact.name}
+                </b>
                 <span>
                   {formatInt(contact.distanceKm)} km · {contact.level}
                 </span>

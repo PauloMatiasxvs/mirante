@@ -5,6 +5,8 @@ import './LayerDrawer.css';
 
 const LAYERS: Array<{ id: LayerId; label: string }> = [
   { id: 'flights', label: 'Voos no Brasil' },
+  { id: 'military', label: 'Voos militares' },
+  { id: 'world', label: 'Voos no mundo' },
   { id: 'earthquakes', label: 'Terremotos (24 h)' },
   { id: 'satellites', label: 'Satélites e estações' },
   { id: 'buildings', label: 'Prédios em 3D' },
@@ -12,12 +14,9 @@ const LAYERS: Array<{ id: LayerId; label: string }> = [
 
 export function LayerDrawer() {
   const engine = useEngine();
-  const [visible, setVisible] = useState<Record<LayerId, boolean>>({
-    flights: true,
-    earthquakes: true,
-    satellites: true,
-    buildings: true,
-  });
+  const [visible, setVisible] = useState<Record<LayerId, boolean>>(
+    () => Object.fromEntries(LAYERS.map(({ id }) => [id, true])) as Record<LayerId, boolean>,
+  );
 
   function toggle(id: LayerId, value: boolean) {
     engine.setLayerVisible(id, value);

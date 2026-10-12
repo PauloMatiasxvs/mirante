@@ -54,8 +54,17 @@ label:focus-within {
   border-radius: 50%;
 }
 
-.dot--flights {
+.dot--flights,
+.dot--flight {
   background: #7dd3fc;
+}
+
+.dot--military {
+  background: #fb7185;
+}
+
+.dot--world {
+  background: #e2e8f0;
 }
 
 .dot--earthquakes {
@@ -67,7 +76,7 @@ label:focus-within {
 }
 
 .dot--buildings {
-  background: #e7ebf0;
+  background: #94a3b8;
 }
 
 @keyframes blink {

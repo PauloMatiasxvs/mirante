@@ -1,4 +1,4 @@
-import type { Flight } from '../../api/flights';
+import type { Flight } from '../../api/_lib/flight';
 
 export type { Flight };
 

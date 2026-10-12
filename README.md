@@ -14,9 +14,11 @@ visor de satélite, com os aviões voando sobre o Brasil, os terremotos das últ
 - 🛰️ **Visor de satélite**: bússola que gira com a câmera, mira e telemetria ao vivo
   do ponto observado: coordenadas, altitude do solo, distância, resolução em
   metros por pixel e a elevação do Sol naquele lugar e horário.
-- ✈️ **Voos ao vivo no Brasil**: posição, altitude, velocidade, modelo e matrícula de
-  cada avião. Entre uma atualização e outra o avião segue andando no mapa,
-  calculado a partir da velocidade e do rumo.
+- ✈️ **Voos ao vivo**: os do Brasil com modelo e matrícula, os militares do mundo
+  inteiro e cerca de 6 mil aviões em todos os continentes. Entre uma atualização e
+  outra cada avião segue andando no mapa, calculado pela velocidade e pelo rumo.
+- 📡 **Voos ao redor**: painel com quantos aviões há na área que você está vendo
+  (o raio acompanha o zoom) e a lista dos mais próximos; um clique leva até o avião.
 - 🧑‍✈️ **Cockpit**: embarque num avião ao vivo e veja em primeira pessoa, com fita de
   rumo, velocidade, altitude, razão de subida e a lista dos aviões ao redor. Dá para
   pular de um avião para outro e olhar em volta com as setas do teclado.
@@ -73,7 +75,7 @@ pequeno, e os componentes React só leem esse estado (via `useSyncExternalStore`
 ações do motor.
 
 ```
-api/flights.ts          função serverless: busca os voos no adsb.lol (que não libera CORS)
+api/                    funções serverless: voos do Brasil, militares e do mundo (as APIs não liberam CORS)
 src/
   map/
     engine.ts           cria o viewer, luz, sombras, camadas; expõe ações e o store
@@ -102,7 +104,8 @@ e transforma `api/flights.ts` numa função serverless.
 
 | Dado | Fonte | Observação |
 | --- | --- | --- |
-| Voos | [adsb.lol](https://adsb.lol) | Rede comunitária de receptores ADS-B, dados sob ODbL |
+| Voos no Brasil e militares | [adsb.lol](https://adsb.lol) | Rede comunitária de receptores ADS-B, dados sob ODbL |
+| Voos no mundo | [OpenSky Network](https://opensky-network.org) | Acesso anônimo; o servidor atualiza o retrato a cada 15 min |
 | Terremotos | [USGS](https://earthquake.usgs.gov/earthquakes/feed/) | Feed público do Serviço Geológico dos EUA |
 | Órbitas | [CelesTrak](https://celestrak.org) | Elementos orbitais (TLE), guardados em cache por 2 h |
 | Prédios | [OpenStreetMap](https://www.openstreetmap.org/copyright) | © colaboradores do OpenStreetMap, sob ODbL |
