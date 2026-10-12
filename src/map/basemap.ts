@@ -16,6 +16,8 @@ import {
   type Scene,
 } from 'cesium';
 
+import type { City } from '../lib/place';
+
 // Place names in Portuguese and border lines, drawn from Natural Earth data.
 // The keyless label tile layers available are English-only.
 
@@ -71,11 +73,12 @@ function drawLines(scene: Scene, lines: number[][], width: number, color: Color)
   );
 }
 
-export async function addBasemap(scene: Scene): Promise<void> {
+/** Draws names and borders; resolves with the city list for place lookups. */
+export async function addBasemap(scene: Scene): Promise<City[]> {
   const [labels, borders] = (await Promise.all(
     ['/data/labels.json', '/data/borders.json'].map((url) => fetch(url).then((r) => r.json())),
   )) as [Labels, Borders];
-  if (scene.isDestroyed()) return;
+  if (scene.isDestroyed()) return [];
 
   drawLines(scene, borders.countries, 1.5, WHITE.withAlpha(0.55));
   drawLines(scene, borders.states, 1, WHITE.withAlpha(0.28));
@@ -131,4 +134,6 @@ export async function addBasemap(scene: Scene): Promise<void> {
       distanceDisplayCondition: visible,
     });
   }
+
+  return labels.cities.map(([name, lon, lat]) => ({ name, lat, lon }));
 }

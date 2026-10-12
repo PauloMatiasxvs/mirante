@@ -1,23 +1,31 @@
-.visor {
-  --radius: min(42vh, 42vw);
-  position: fixed;
+.lens {
+  --radius: min(41vh, 36vw);
+  position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   color: var(--accent);
-  font-family: var(--mono);
-  text-shadow: var(--text-shadow);
-  background:
-    radial-gradient(circle at 50% 50%, transparent 0 var(--radius), rgba(2, 5, 11, 0.6) calc(var(--radius) + 1px)),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px);
 }
 
-/* The regular vignette steps aside while the visor is up. */
-body:has(.visor) .vignette {
+/* Everything outside the lens is dimmed and slightly blurred, with a soft edge. */
+.lens__outside {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 calc(var(--radius) - 10px), rgba(1, 4, 9, 0.62) calc(var(--radius) + 70px)),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 3px);
+  backdrop-filter: blur(1.5px) saturate(0.75);
+  -webkit-backdrop-filter: blur(1.5px) saturate(0.75);
+  mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--radius) - 20px), #000 calc(var(--radius) + 50px));
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--radius) - 20px), #000 calc(var(--radius) + 50px));
+}
+
+/* The regular vignette steps aside while the lens is up. */
+.screen:has(.lens) .vignette {
   display: none;
 }
 
-.visor__compass {
+.lens__compass {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -27,113 +35,62 @@ body:has(.visor) .vignette {
   overflow: visible;
 }
 
-.visor__rim {
+.lens__rim {
   fill: none;
   stroke: currentColor;
-  stroke-opacity: 0.4;
+  stroke-opacity: 0.35;
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
 
-.visor__tick {
+.lens__rim--inner {
+  stroke-opacity: 0.12;
+  stroke-dasharray: 2 4;
+}
+
+.lens__tick {
   stroke: currentColor;
-  stroke-opacity: 0.3;
+  stroke-opacity: 0.22;
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
 
-.visor__tick--major {
-  stroke-opacity: 0.75;
+.lens__tick--medium {
+  stroke-opacity: 0.45;
 }
 
-.visor__compass text {
+.lens__tick--major {
+  stroke-opacity: 0.85;
+  stroke-width: 1.5;
+}
+
+.lens__compass text {
   fill: currentColor;
-  fill-opacity: 0.85;
-  font: 500 5px var(--mono);
+  font: 600 4.5px var(--mono);
   text-anchor: middle;
   dominant-baseline: middle;
 }
 
-.visor__reticle {
+.lens__reticle {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 120px;
-  height: 120px;
+  width: 110px;
+  height: 110px;
   translate: -50% -50%;
   fill: none;
   stroke: currentColor;
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
-.visor__reticle circle {
+.lens__reticle circle {
   fill: currentColor;
 }
 
-.visor__header {
-  position: absolute;
-  top: calc(50% - var(--radius) + 34px);
-  left: 50%;
-  translate: -50% 0;
-  margin: 0;
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  white-space: nowrap;
-  opacity: 0.85;
-}
-
-.visor__rec {
-  color: #f87171;
-  animation: blink 1.2s steps(2, start) infinite;
-}
-
-.visor__data {
-  position: absolute;
-  bottom: 64px;
-  display: grid;
-  gap: 2px;
-  margin: 0;
-  font-size: 11px;
-}
-
-.visor__data div {
-  display: grid;
-  grid-template-columns: 90px auto;
-  gap: 14px;
-}
-
-.visor__data dt {
-  align-self: center;
-  opacity: 0.55;
-  font-size: 9px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.visor__data dd {
-  margin: 0;
-}
-
-.visor__data--left {
-  left: var(--gutter);
-}
-
-.visor__data--right {
-  right: var(--gutter);
-}
-
-.visor__data--right dd {
-  text-align: right;
-}
-
 @media (max-width: 720px) {
-  .visor__data {
-    display: none;
-  }
-
-  .visor__header {
-    font-size: 10px;
+  .lens {
+    --radius: 44vw;
   }
 }

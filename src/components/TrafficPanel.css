@@ -1,6 +1,6 @@
 .traffic {
   padding: 12px 14px;
-  background: var(--glass);
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
   backdrop-filter: blur(12px);

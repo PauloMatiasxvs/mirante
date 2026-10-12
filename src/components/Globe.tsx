@@ -29,14 +29,15 @@ export function Globe({ onReady }: Props) {
       <div ref={containerRef} className="globe" />
       <div className="vignette" aria-hidden="true" />
       <footer className="credits">
+        <div ref={creditsRef} className="credits__cesium" />
         <span>
           <a href="https://adsb.lol" target="_blank" rel="noreferrer">adsb.lol</a> ·{' '}
+          <a href="https://opensky-network.org" target="_blank" rel="noreferrer">OpenSky</a> ·{' '}
           <a href="https://earthquake.usgs.gov" target="_blank" rel="noreferrer">USGS</a> ·{' '}
           <a href="https://celestrak.org" target="_blank" rel="noreferrer">CelesTrak</a> ·{' '}
           <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap</a> ·
-          Esri
+          Natural Earth · Esri
         </span>
-        <div ref={creditsRef} className="credits__cesium" />
       </footer>
     </>
   );

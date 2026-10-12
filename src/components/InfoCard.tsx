@@ -10,7 +10,7 @@ export function InfoCard() {
   const target = info.cockpitTarget;
 
   return (
-    <article className="info-card" aria-live="polite">
+    <article className="info-card panel" aria-live="polite">
       <button type="button" className="info-card__close" aria-label="Fechar" onClick={() => engine.clearSelection()}>
         ×
       </button>

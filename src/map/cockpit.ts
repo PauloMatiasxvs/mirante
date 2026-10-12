@@ -1,6 +1,7 @@
-import { Cartesian2, Cartesian3, Cartographic, Math as CesiumMath, type JulianDate, type Viewer } from 'cesium';
+import { Cartesian3, Cartographic, Math as CesiumMath, type JulianDate, type Viewer } from 'cesium';
 import { aircraftModel, flightLevel, flightName } from '../lib/aircraft';
 import { normalizeDegrees } from '../lib/geo';
+import { pickSurface, screenCenter } from './pick';
 import type { FlightSource } from './types';
 
 const DEFAULT_PITCH = CesiumMath.toRadians(-6);
@@ -119,8 +120,7 @@ export class CockpitController {
   enterNearest(preferredId?: string | null): boolean {
     if (preferredId && this.sourceOf(preferredId) && this.enter(preferredId)) return true;
     const { scene, camera } = this.viewer;
-    const ray = camera.getPickRay(new Cartesian2(scene.canvas.clientWidth / 2, scene.canvas.clientHeight / 2));
-    const point = (ray && scene.globe.pick(ray, scene)) ?? camera.positionWC;
+    const point = pickSurface(scene, screenCenter(scene)) ?? camera.positionWC;
     const id = this.nearestTo(point);
     return id ? this.enter(id) : false;
   }

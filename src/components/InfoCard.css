@@ -1,7 +1,7 @@
 .info-card {
   position: relative;
   padding: 14px 16px;
-  background: var(--glass-strong);
+  background: var(--panel-strong);
   border: 1px solid var(--line);
   border-radius: 10px;
   backdrop-filter: blur(12px);

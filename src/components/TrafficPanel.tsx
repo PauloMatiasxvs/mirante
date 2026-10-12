@@ -17,10 +17,10 @@ export function TrafficPanel() {
   const total = traffic.counts.flight + traffic.counts.military + traffic.counts.world;
 
   return (
-    <section className="traffic" aria-label="Voos ao redor">
+    <section className="traffic panel" aria-label="Aviões ao redor">
       <header className="traffic__header">
-        <h2>Voos ao redor</h2>
-        <span>{formatInt(traffic.radiusKm)} km</span>
+        <h2>Sinais ao vivo</h2>
+        <span>raio {formatInt(traffic.radiusKm)} km</span>
       </header>
       <p className="traffic__total">
         <strong>{formatInt(total)}</strong> no ar

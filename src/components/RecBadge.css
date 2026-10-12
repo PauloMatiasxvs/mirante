@@ -1,0 +1,63 @@
+.rec {
+  position: absolute;
+  z-index: 2;
+  top: 24px;
+  right: var(--pad);
+  text-align: right;
+  pointer-events: none;
+  font-family: var(--mono);
+  text-shadow: var(--text-shadow);
+}
+
+.rec p {
+  margin: 0;
+}
+
+.rec__time {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+}
+
+.rec__dot {
+  color: var(--rec);
+  animation: blink 1.2s steps(2, start) infinite;
+}
+
+.rec__line {
+  margin-top: 3px !important;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+
+.rec__label {
+  margin-top: 14px !important;
+}
+
+.rec__mode {
+  color: var(--accent);
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+}
+
+@media (max-width: 720px) {
+  .rec__line,
+  .rec__label,
+  .rec__mode {
+    display: none;
+  }
+
+  .rec {
+    top: 14px;
+  }
+
+  .rec__time {
+    font-size: 10px;
+  }
+}
+
+.in-cockpit .rec {
+  display: none;
+}

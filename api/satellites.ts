@@ -1,17 +1,10 @@
 import { cachedRoute } from './_lib/cachedRoute.js';
+import { SATELLITE_GROUPS, type SatelliteGroup, type SatellitesResponse } from './_lib/satelliteGroups.js';
 
 // Orbital elements (TLE) from CelesTrak, merged into one cached response.
 // CelesTrak blocks clients that download the same data more than every couple
 // of hours, so the browser never talks to it directly: this route caches for
 // 2 h in memory and the CDN shares that copy across every visitor.
-
-export const SATELLITE_GROUPS = ['stations', 'visual', 'gnss', 'weather', 'geo'] as const;
-export type SatelliteGroup = (typeof SATELLITE_GROUPS)[number];
-
-export interface SatellitesResponse {
-  updatedAt: string;
-  groups: Partial<Record<SatelliteGroup, string>>;
-}
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

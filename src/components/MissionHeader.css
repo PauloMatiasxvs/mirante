@@ -1,0 +1,91 @@
+.mission {
+  position: absolute;
+  z-index: 2;
+  top: 22px;
+  left: var(--pad);
+  max-width: 560px;
+  pointer-events: none;
+  text-shadow: var(--text-shadow);
+}
+
+.mission p {
+  margin: 0;
+}
+
+.mission__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mission__brand h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0.38em;
+  line-height: 1.1;
+}
+
+.mission__brand h1 span {
+  color: var(--accent);
+  letter-spacing: 0.2em;
+}
+
+.mission__block {
+  margin-top: 36px;
+  padding-left: 12px;
+  border-left: 1px solid var(--line-strong);
+}
+
+.mission__line {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.mission__line--accent {
+  color: var(--accent);
+}
+
+.mission__mode {
+  margin: 8px 0 10px !important;
+  color: var(--accent);
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+}
+
+.mission__summary {
+  margin-top: 2px !important;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* Short screens: the layer panel moves up and takes this block's place. */
+@media (max-height: 820px) {
+  .mission__block {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .mission {
+    top: 12px;
+  }
+
+  .mission__brand h1 {
+    font-size: 17px;
+  }
+
+  .mission__brand .hud-label,
+  .mission__block {
+    display: none;
+  }
+}
+
+.in-cockpit .mission {
+  display: none;
+}

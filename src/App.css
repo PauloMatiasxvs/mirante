@@ -1,0 +1,78 @@
+/* The globe and its HUD live inside a framed "screen" over the grid. */
+.screen {
+  position: fixed;
+  top: var(--frame-top);
+  left: var(--frame);
+  right: var(--frame);
+  bottom: var(--frame);
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.7),
+    0 30px 90px rgba(0, 0, 0, 0.7);
+}
+
+.screen__corner {
+  position: absolute;
+  z-index: 3;
+  width: 18px;
+  height: 18px;
+  border-color: var(--accent);
+  border-style: solid;
+  border-width: 0;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.screen__corner--tl {
+  top: 8px;
+  left: 8px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+  border-top-left-radius: 10px;
+}
+
+.screen__corner--tr {
+  top: 8px;
+  right: 8px;
+  border-top-width: 2px;
+  border-right-width: 2px;
+  border-top-right-radius: 10px;
+}
+
+.screen__corner--bl {
+  bottom: 8px;
+  left: 8px;
+  border-bottom-width: 2px;
+  border-left-width: 2px;
+  border-bottom-left-radius: 10px;
+}
+
+.screen__corner--br {
+  bottom: 8px;
+  right: 8px;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+  border-bottom-right-radius: 10px;
+}
+
+.screen__boot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .screen {
+    border-radius: 0;
+    border-width: 0;
+  }
+
+  .screen__corner {
+    display: none;
+  }
+}

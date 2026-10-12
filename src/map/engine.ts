@@ -1,15 +1,12 @@
 import {
   ArcGISTiledElevationTerrainProvider,
   BoundingSphere,
-  Cartesian2,
   Cartesian3,
   Cartographic,
   ClockStep,
   Color,
-  Credit,
   DirectionalLight,
   HeadingPitchRange,
-  ImageryLayer,
   Math as CesiumMath,
   Matrix4,
   sampleTerrain,
@@ -17,12 +14,12 @@ import {
   ScreenSpaceEventType,
   Terrain,
   Transforms,
-  UrlTemplateImageryProvider,
   Viewer,
 } from 'cesium';
 import cities from '../data/cities.json';
 import { aircraftModel, flightLevel, flightName } from '../lib/aircraft';
 import { destination } from '../lib/geo';
+import type { City } from '../lib/place';
 import { createStore, type Store } from '../lib/store';
 import { addBasemap } from './basemap';
 import { CockpitController, type CockpitState } from './cockpit';
@@ -42,9 +39,10 @@ import type {
   MapLayer,
   VisionMode,
 } from './types';
+import { createMapStyles, type MapStyleId } from './mapStyles';
+import { pickSurface, screenCenter } from './pick';
 import { createVisionModes } from './visionModes';
 
-const IMAGERY_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
 const ELEVATION_URL = 'https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer';
 const IDLE_FRAME_S = 0.1;
 const TRAFFIC_INTERVAL_MS = 2_000;
@@ -74,6 +72,7 @@ export interface MapState {
   layers: Record<LayerId, LayerStatus>;
   selection: InfoContent | null;
   visionMode: VisionMode;
+  mapStyle: MapStyleId;
   visor: boolean;
   telemetry: Telemetry | null;
   cockpit: CockpitState | null;
@@ -90,6 +89,11 @@ export interface MapEngine {
   /** Boards the selected flight, or the one nearest the screen center. */
   enterCockpit(): boolean;
   setVisionMode(mode: VisionMode): void;
+  setMapStyle(style: MapStyleId): void;
+  /** Turns the camera to face north, keeping position and tilt. */
+  resetNorth(): void;
+  /** Toggles between looking straight down and an oblique view. */
+  toggleTilt(): void;
   setVisor(on: boolean): void;
   setLayerVisible(id: LayerId, visible: boolean): void;
   clearSelection(): void;
@@ -116,6 +120,7 @@ export function createMapEngine({
     },
     selection: null,
     visionMode: 'normal',
+    mapStyle: 'satellite',
     visor: true,
     telemetry: null,
     cockpit: null,
@@ -132,13 +137,8 @@ export function createMapEngine({
   });
 
   const viewer = new Viewer(container, {
-    baseLayer: new ImageryLayer(
-      new UrlTemplateImageryProvider({
-        url: IMAGERY_URL,
-        maximumLevel: 19,
-        credit: new Credit('Imagens © Esri, Maxar, Earthstar Geographics'),
-      }),
-    ),
+    // Base imagery is managed by mapStyles.
+    baseLayer: false,
     terrain,
     animation: false,
     timeline: false,
@@ -166,6 +166,15 @@ export function createMapEngine({
   scene.globe.maximumScreenSpaceError = 2.5;
   scene.globe.tileCacheSize = 300;
   scene.postProcessStages.fxaa.enabled = true;
+  // Soft glow on bright points and labels, kept subtle so imagery stays crisp.
+  const { bloom } = scene.postProcessStages;
+  bloom.enabled = true;
+  bloom.uniforms.glowOnly = false;
+  bloom.uniforms.contrast = 128;
+  bloom.uniforms.brightness = -0.62;
+  bloom.uniforms.delta = 0.9;
+  bloom.uniforms.sigma = 1.6;
+  bloom.uniforms.stepSize = 1;
   // The scene clock follows real time so planes and satellites move live.
   viewer.clock.clockStep = ClockStep.SYSTEM_CLOCK;
   viewer.clock.shouldAnimate = true;
@@ -186,10 +195,18 @@ export function createMapEngine({
   const lightboxTitle = document.querySelector('.cesium-credit-lightbox-title');
   if (lightboxTitle) lightboxTitle.textContent = 'Dados fornecidos por:';
 
-  void addBasemap(scene).catch((error) => console.warn('basemap unavailable:', error));
+  let placeNames: City[] = [];
+  addBasemap(scene)
+    .then((list) => (placeNames = list))
+    .catch((error) => console.warn('basemap unavailable:', error));
 
   const reportStatus = (id: LayerId) => (status: LayerStatus) =>
-    store.set((state) => ({ layers: { ...state.layers, [id]: status } }));
+    store.set((state) => ({
+      layers: {
+        ...state.layers,
+        [id]: { ...status, updatedAt: status.error ? state.layers[id].updatedAt : Date.now() },
+      },
+    }));
 
   const flights = createFlightsLayer(
     viewer,
@@ -232,19 +249,30 @@ export function createMapEngine({
   ];
   const hiddenLayers = new Set<LayerId>();
 
-  const cockpit = new CockpitController(viewer, flightSources, (state) => store.set({ cockpit: state }));
+  const cockpit = new CockpitController(viewer, flightSources, (state) => {
+    store.set({ cockpit: state });
+    satellites.setLabelsVisible(state === null);
+  });
   // Render continuously only while the camera rides something that moves
   // (the cockpit toggles this itself).
   const removeTrackingListener = viewer.trackedEntityChanged.addEventListener(() => {
     scene.requestRenderMode = !cockpit.active && !viewer.trackedEntity;
   });
   const visionModes = createVisionModes(viewer);
-  const telemetry = createTelemetry(viewer, (value) => store.set({ telemetry: value }));
+  const telemetry = createTelemetry(
+    viewer,
+    () => placeNames,
+    (value) => store.set({ telemetry: value }),
+  );
   telemetry.setEnabled(true);
+  const mapStyles = createMapStyles(viewer, (photoreal) => {
+    // Google's tiles already have real buildings everywhere.
+    buildings.setVisible(!photoreal && !hiddenLayers.has('buildings'));
+  });
 
   // --- Selection -----------------------------------------------------------
-  // Entities are selected by Cesium's own picking; worldwide flights are plain
-  // billboards, so clicks on them are routed here by id.
+  // Entities are selected by Cesium's own picking; clicks on plain primitives
+  // are routed here by id.
   let selectedId: string | null = null;
 
   function refreshSelection() {
@@ -262,18 +290,16 @@ export function createMapEngine({
     select(entity?.id ?? null),
   );
   const clickHandler = new ScreenSpaceEventHandler(scene.canvas);
+  // Primitives (worldwide flights, satellites) carry a plain string id.
   clickHandler.setInputAction((click: ScreenSpaceEventHandler.PositionedEvent) => {
     const id = scene.pick(click.position)?.id;
-    if (typeof id === 'string' && id.startsWith(world.idPrefix)) select(id);
+    if (typeof id === 'string' && layers.some((layer) => id.startsWith(layer.idPrefix))) select(id);
   }, ScreenSpaceEventType.LEFT_CLICK);
   const selectionTimer = window.setInterval(refreshSelection, 1000);
 
   // --- Nearby traffic --------------------------------------------------------
 
-  function viewCenter(): Cartesian3 | undefined {
-    const ray = camera.getPickRay(new Cartesian2(scene.canvas.clientWidth / 2, scene.canvas.clientHeight / 2));
-    return (ray && scene.globe.pick(ray, scene)) ?? undefined;
-  }
+  const viewCenter = () => pickSurface(scene, screenCenter(scene));
 
   function refreshTraffic() {
     if (cockpit.active) return;
@@ -388,6 +414,33 @@ export function createMapEngine({
     setVisionMode(mode) {
       visionModes.apply(mode);
       store.set({ visionMode: mode });
+    },
+    setMapStyle(style) {
+      store.set({ mapStyle: style });
+      mapStyles.apply(style).catch((error) => {
+        console.warn('map style unavailable, back to satellite:', error);
+        store.set({ mapStyle: 'satellite' });
+        void mapStyles.apply('satellite');
+      });
+    },
+    resetNorth() {
+      viewer.trackedEntity = undefined;
+      camera.flyTo({
+        destination: camera.positionWC.clone(),
+        orientation: { heading: 0, pitch: camera.pitch, roll: 0 },
+        duration: 1,
+      });
+    },
+    toggleTilt() {
+      viewer.trackedEntity = undefined;
+      const center = viewCenter();
+      const straightDown = camera.pitch < CesiumMath.toRadians(-80);
+      if (!center) return;
+      const range = Cartesian3.distance(camera.positionWC, center);
+      camera.flyToBoundingSphere(new BoundingSphere(center, 0), {
+        offset: new HeadingPitchRange(camera.heading, CesiumMath.toRadians(straightDown ? -35 : -90), range),
+        duration: 1.2,
+      });
     },
     setVisor(on) {
       telemetry.setEnabled(on);

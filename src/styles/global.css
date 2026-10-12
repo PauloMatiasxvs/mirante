@@ -1,23 +1,45 @@
 :root {
-  --glass: rgba(6, 10, 18, 0.62);
-  --glass-strong: rgba(6, 10, 18, 0.82);
-  --line: rgba(148, 163, 184, 0.16);
-  --text: #e2e8f0;
-  --muted: #8b98ab;
+  --bg: #02050a;
+  --panel: rgba(6, 12, 20, 0.72);
+  --panel-strong: rgba(6, 12, 20, 0.9);
+  --line: rgba(125, 211, 252, 0.14);
+  --line-strong: rgba(125, 211, 252, 0.32);
+  --text: #e6edf5;
+  --muted: #7d8ba0;
+  --faint: #4b586b;
   --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.12);
   --error: #f87171;
+  --rec: #ef4444;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
-  --gutter: 22px;
-  --text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+  --display: 'Oxanium', 'JetBrains Mono', sans-serif;
+  --frame-top: 34px;
+  --frame: 14px;
+  --pad: 26px;
+  --text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
 }
 
 /* The accent follows the globe's vision mode. */
+body[data-mode='crt'],
 body[data-mode='night'] {
   --accent: #4ade80;
+  --accent-soft: rgba(74, 222, 128, 0.12);
+  --line: rgba(74, 222, 128, 0.16);
+  --line-strong: rgba(74, 222, 128, 0.34);
 }
 
 body[data-mode='thermal'] {
   --accent: #fb923c;
+  --accent-soft: rgba(251, 146, 60, 0.12);
+  --line: rgba(251, 146, 60, 0.16);
+  --line-strong: rgba(251, 146, 60, 0.34);
+}
+
+body[data-mode='noir'] {
+  --accent: #e5e7eb;
+  --accent-soft: rgba(229, 231, 235, 0.1);
+  --line: rgba(229, 231, 235, 0.14);
+  --line-strong: rgba(229, 231, 235, 0.3);
 }
 
 * {
@@ -29,9 +51,14 @@ body {
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background: #02050b;
   color: var(--text);
   font: 13px/1.4 Inter, system-ui, sans-serif;
+  /* Blueprint grid behind the screen frame. */
+  background:
+    linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 56px 56px,
+    linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 56px 56px,
+    radial-gradient(ellipse at 50% 40%, #071423, var(--bg) 70%);
+  background-color: var(--bg);
 }
 
 button {
@@ -44,6 +71,33 @@ summary:focus-visible,
 label:focus-within {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* Small uppercase mono text used all over the HUD. */
+.hud-label {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.hud-text {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-shadow: var(--text-shadow);
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .dot {
@@ -87,7 +141,9 @@ label:focus-within {
 
 @media (max-width: 720px) {
   :root {
-    --gutter: 12px;
+    --frame-top: 10px;
+    --frame: 0px;
+    --pad: 12px;
   }
 }
 

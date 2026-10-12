@@ -10,6 +10,8 @@ export type Destination = 'brazil' | 'planet' | 'iss' | CityId;
 export interface LayerStatus {
   count: number | null;
   error: boolean;
+  /** Unix ms of the last successful load. */
+  updatedAt?: number;
 }
 
 export interface InfoContent {

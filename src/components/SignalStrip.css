@@ -1,0 +1,43 @@
+.signal-strip {
+  position: fixed;
+  top: 0;
+  left: calc(var(--frame) + 14px);
+  right: calc(var(--frame) + 14px);
+  height: var(--frame-top);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+
+.signal-strip p {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+}
+
+.signal-strip b {
+  color: var(--text);
+  font-weight: 400;
+}
+
+.signal-strip__live {
+  color: var(--accent);
+}
+
+.signal-strip__off b {
+  color: var(--error);
+}
+
+.signal-strip__right {
+  color: var(--faint);
+}
+
+@media (max-width: 720px) {
+  .signal-strip {
+    display: none;
+  }
+}

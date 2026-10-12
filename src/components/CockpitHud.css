@@ -1,5 +1,5 @@
 .cockpit {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 2;
   pointer-events: none;
@@ -79,7 +79,7 @@
 
 .cockpit__readouts {
   position: absolute;
-  bottom: 128px;
+  bottom: 168px;
   left: 50%;
   translate: -50% 0;
   display: flex;
@@ -116,10 +116,10 @@
 .cockpit__contacts {
   position: absolute;
   top: 84px;
-  left: var(--gutter);
+  left: var(--pad);
   width: 230px;
   padding: 10px 14px;
-  background: var(--glass);
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
   backdrop-filter: blur(12px);
@@ -165,7 +165,7 @@
 
 .cockpit__actions {
   position: absolute;
-  bottom: 76px;
+  bottom: 104px;
   left: 50%;
   translate: -50% 0;
   display: flex;
@@ -177,7 +177,7 @@
   padding: 7px 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: var(--glass);
+  background: var(--panel);
   color: var(--text);
   font-family: var(--mono);
   font-size: 11px;
@@ -200,7 +200,7 @@
 
 .cockpit__hint {
   position: absolute;
-  left: var(--gutter);
+  left: var(--pad);
   bottom: 30px;
   margin: 0;
   color: var(--muted);

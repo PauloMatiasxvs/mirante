@@ -1,0 +1,158 @@
+.layer-panel {
+  position: absolute;
+  z-index: 2;
+  top: 262px;
+  left: var(--pad);
+  width: 300px;
+  padding: 4px 6px 6px;
+}
+
+.layer-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 8px;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.layer-panel__chevron {
+  margin-left: auto;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.layer-panel__list {
+  margin: 0;
+  padding: 2px 0 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.layer-panel__list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  transition: opacity 0.15s;
+}
+
+.layer-panel__list li:hover {
+  background: rgba(148, 163, 184, 0.06);
+}
+
+.layer-panel__item--off {
+  opacity: 0.45;
+}
+
+.layer-panel__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.layer-panel__icon--flights {
+  color: #7dd3fc;
+}
+
+.layer-panel__icon--military {
+  color: #fb7185;
+}
+
+.layer-panel__icon--world {
+  color: #e2e8f0;
+}
+
+.layer-panel__icon--satellites {
+  color: #c4b5fd;
+}
+
+.layer-panel__icon--earthquakes {
+  color: #fb923c;
+}
+
+.layer-panel__icon--buildings {
+  color: #94a3b8;
+}
+
+.layer-panel__name {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.layer-panel__name b {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.layer-panel__name small {
+  overflow: hidden;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layer-panel__count {
+  min-width: 38px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  text-align: right;
+}
+
+.toggle {
+  flex: none;
+  min-width: 44px;
+  padding: 3px 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.toggle--on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.in-cockpit .layer-panel {
+  display: none;
+}
+
+@media (max-height: 820px) {
+  .layer-panel {
+    top: 92px;
+  }
+}
+
+@media (max-width: 720px) {
+  .layer-panel {
+    top: 56px;
+    left: var(--pad);
+    right: var(--pad);
+    width: auto;
+  }
+
+  .layer-panel:not(.layer-panel--closed) {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+}

@@ -22,7 +22,9 @@ const API_ROUTES = {
 function localApi(): Plugin {
   const mount = (server: { middlewares: Connect.Server }) => {
     for (const [path, handler] of Object.entries(API_ROUTES)) {
-      server.middlewares.use(path, (req, res) => {
+      server.middlewares.use(path, (req, res, next) => {
+        // Connect also matches prefixes like /api/flights.ts; only serve the route itself.
+        if (req.url && !/^\/?(\?|$)/.test(req.url)) return next();
         void handler(req, res);
       });
     }

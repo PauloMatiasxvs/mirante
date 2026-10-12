@@ -1,68 +1,187 @@
 .dock {
-  position: fixed;
-  z-index: 2;
-  bottom: var(--gutter);
+  position: absolute;
+  z-index: 3;
+  bottom: 16px;
   left: 50%;
   translate: -50% 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  max-width: calc(100vw - 2 * var(--gutter));
-  padding: 5px;
-  background: var(--glass);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  overflow-x: auto;
-  scrollbar-width: none;
+  gap: 10px;
 }
 
-.dock__group {
+.dock__bar {
   display: flex;
-  gap: 2px;
+  align-items: center;
+  gap: 10px;
 }
 
-.dock__button {
-  padding: 7px 12px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
+.dock__pod {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 190px;
+  height: 46px;
+  padding: 0 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--panel);
   color: var(--muted);
   font-family: var(--mono);
   font-size: 11px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  white-space: nowrap;
   cursor: pointer;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   transition:
     color 0.15s,
-    background 0.15s;
+    border-color 0.15s;
 }
 
-.dock__button:hover {
-  color: var(--text);
-  background: rgba(148, 163, 184, 0.1);
-}
-
-.dock__button--active {
+.dock__pod:hover,
+.dock__pod--open {
+  border-color: var(--accent);
   color: var(--accent);
-  background: rgba(148, 163, 184, 0.12);
 }
 
-.dock__divider {
-  flex: none;
-  width: 1px;
+.dock__cockpit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, rgba(56, 189, 248, 0.16), var(--panel-strong) 70%);
+  color: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 0 24px var(--accent-soft);
+}
+
+.dock__cockpit svg {
+  width: 20px;
+  height: 20px;
+}
+
+.dock__cockpit small {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.dock__cockpit:hover,
+.dock__cockpit--active {
+  border-color: var(--accent);
+  box-shadow: 0 0 32px var(--accent-soft), inset 0 0 0 1px var(--accent);
+}
+
+.dock__tray {
+  padding: 12px 14px 14px;
+  border-color: var(--line-strong);
+}
+
+.dock__tray-title {
+  margin: 4px 2px 8px;
+}
+
+.dock__tray-title + .dock__grid + .dock__tray-title {
+  margin-top: 14px;
+}
+
+.dock__grid {
+  display: flex;
+  gap: 8px;
+}
+
+.dock__grid--wide {
+  display: grid;
+  grid-template-columns: repeat(3, 150px);
+}
+
+.dock__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 78px;
+  height: 64px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.05);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.dock__tile svg {
+  width: 18px;
   height: 18px;
-  margin: 0 6px;
-  background: var(--line);
+}
+
+.dock__tile:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.dock__tile--active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.dock__tile--text {
+  align-items: flex-start;
+  width: auto;
+  height: auto;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.dock__tile--text b {
+  color: var(--text);
+  font-family: Inter, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.dock__tile--text small {
+  font-size: 9px;
 }
 
 @media (max-width: 720px) {
   .dock {
-    left: var(--gutter);
-    right: var(--gutter);
+    left: var(--pad);
+    right: var(--pad);
     translate: none;
-    border-radius: 12px;
+  }
+
+  .dock__pod {
+    min-width: 0;
+    flex: 1;
+    padding: 0 10px;
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+  }
+
+  .dock__grid {
+    flex-wrap: wrap;
+  }
+
+  .dock__grid--wide {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dock__tile {
+    width: 64px;
   }
 }

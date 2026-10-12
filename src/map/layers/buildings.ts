@@ -22,8 +22,8 @@ type Building = number[];
 
 const LOAD_DISTANCE_M = 30_000;
 const TERRAIN_LEVEL = 13; // ~20 m resolution, plenty for building bases
-const LOW = Color.fromCssColorString('#e7ebf0');
-const HIGH = Color.fromCssColorString('#a9cdf5');
+const LOW = Color.fromCssColorString('#b9c4d2');
+const HIGH = Color.fromCssColorString('#7fa9d6');
 
 export interface BuildingsLayer extends MapLayer {
   load(city: CityId): Promise<number>;

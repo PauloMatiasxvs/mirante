@@ -1,24 +1,24 @@
 .globe {
-  position: fixed;
+  position: absolute;
   inset: 0;
 }
 
 .vignette {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.5));
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55));
 }
 
 .credits {
-  position: fixed;
+  position: absolute;
   z-index: 2;
-  right: var(--gutter);
-  bottom: 10px;
+  left: var(--pad);
+  bottom: 12px;
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--muted);
+  color: var(--faint);
   font-size: 10px;
   text-shadow: var(--text-shadow);
 }
