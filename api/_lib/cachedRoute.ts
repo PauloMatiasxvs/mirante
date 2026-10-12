@@ -1,6 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 interface Options {
+  /** Used in log messages. */
+  name: string;
   /** How long a successful response is reused before fetching again. */
   cacheMs: number;
   /** Sent with successful responses, so the Vercel edge can cache them too. */
@@ -19,7 +21,7 @@ function sendJson(res: ServerResponse, status: number, body: string, cacheContro
  * requests share one fetch, results are cached, and when the upstream fails
  * the last good response is served instead of an error.
  */
-export function cachedRoute<T>(load: () => Promise<T>, { cacheMs, cacheControl }: Options) {
+export function cachedRoute<T>(load: () => Promise<T>, { name, cacheMs, cacheControl }: Options) {
   let cache: { at: number; body: string } | null = null;
   let inFlight: Promise<T> | null = null;
 
@@ -40,7 +42,7 @@ export function cachedRoute<T>(load: () => Promise<T>, { cacheMs, cacheControl }
       }
       sendJson(res, 200, cache.body, cacheControl);
     } catch (error) {
-      console.error(`${req.url ?? 'route'}:`, (error as Error).message);
+      console.error(`${name}:`, (error as Error).message);
       if (cache) sendJson(res, 200, cache.body, cacheControl);
       else sendJson(res, 502, JSON.stringify({ error: 'upstream unavailable' }), 'no-store');
     }

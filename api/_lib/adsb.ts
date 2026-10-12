@@ -4,7 +4,8 @@ import type { RawAircraft } from './flight.js';
 // queue, so requests go out one at a time with a gap between them, and once
 // the API pushes back they all wait out the same backoff window.
 const TIMEOUT_MS = 10_000;
-const MIN_GAP_MS = 2_000;
+// It allows a short burst, then roughly one request every 8-10 s.
+const MIN_GAP_MS = 8_000;
 const BACKOFF_MS = 60_000;
 
 let blockedUntil = 0;

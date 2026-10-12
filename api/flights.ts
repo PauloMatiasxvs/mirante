@@ -37,6 +37,7 @@ async function loadFlights(): Promise<FlightsResponse> {
 }
 
 export default cachedRoute(loadFlights, {
-  cacheMs: 45_000,
-  cacheControl: 'public, max-age=20, s-maxage=45, stale-while-revalidate=60',
+  name: 'flights',
+  cacheMs: 90_000,
+  cacheControl: 'public, max-age=45, s-maxage=90, stale-while-revalidate=120',
 });

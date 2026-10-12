@@ -199,7 +199,7 @@ export function createMapEngine({
       idPrefix: 'flight-',
       color: '#7dd3fc',
       label: 'Voo ao vivo',
-      refreshMs: 30_000,
+      refreshMs: 45_000,
     },
     reportStatus('flights'),
   );
@@ -211,7 +211,7 @@ export function createMapEngine({
       idPrefix: 'mil-',
       color: '#fb7185',
       label: 'Voo militar',
-      refreshMs: 60_000,
+      refreshMs: 120_000,
     },
     reportStatus('military'),
   );

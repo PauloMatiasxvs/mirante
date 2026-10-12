@@ -85,6 +85,7 @@ async function loadWorld(): Promise<WorldResponse> {
 }
 
 export default cachedRoute(loadWorld, {
+  name: 'world',
   cacheMs: 15 * 60_000,
   cacheControl: 'public, max-age=300, s-maxage=900, stale-while-revalidate=1800',
 });

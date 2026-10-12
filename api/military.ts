@@ -14,6 +14,7 @@ async function loadMilitary(): Promise<FlightsResponse> {
 }
 
 export default cachedRoute(loadMilitary, {
-  cacheMs: 60_000,
-  cacheControl: 'public, max-age=30, s-maxage=60, stale-while-revalidate=120',
+  name: 'military',
+  cacheMs: 120_000,
+  cacheControl: 'public, max-age=60, s-maxage=120, stale-while-revalidate=240',
 });
