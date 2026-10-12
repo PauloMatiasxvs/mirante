@@ -12,15 +12,12 @@ const REGIONS = [
   { name: 'Brasília', lat: -15.8, lon: -47.9 },
   { name: 'Fortaleza', lat: -3.78, lon: -38.53 },
 ];
-const REGION_PAUSE_MS = 2_000;
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function loadFlights(): Promise<FlightsResponse> {
   const batches: RawAircraft[][] = [];
   let failures = 0;
-  for (const [index, { name, lat, lon }] of REGIONS.entries()) {
-    if (index > 0) await sleep(REGION_PAUSE_MS);
+  // fetchAdsb already spaces requests out, one region at a time.
+  for (const { name, lat, lon } of REGIONS) {
     try {
       batches.push(await fetchAdsb(`lat/${lat}/lon/${lon}/dist/250`));
     } catch (error) {
