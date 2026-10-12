@@ -1,16 +1,15 @@
 import {
   CallbackProperty,
-  Cartesian2,
   Cartesian3,
   Color,
   CustomDataSource,
   HeightReference,
   JulianDate,
-  LabelStyle,
   type Viewer,
 } from 'cesium';
 import { formatBrasiliaTime, formatInt, timeAgo } from '../../lib/format';
 import { translateQuakePlace } from '../../lib/quakePlace';
+import { tagStyle } from '../tagStyle';
 import type { InfoContent, LayerStatus, MapLayer } from '../types';
 
 const FEED = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson';
@@ -86,14 +85,9 @@ export function createEarthquakesLayer(viewer: Viewer, onStatus: (status: LayerS
           label:
             magnitude >= 4
               ? {
+                  ...tagStyle(color.toCssHexString(), { offsetY: -4, fadeFrom: 5e6, fadeTo: 4e7 }),
                   heightReference: HeightReference.RELATIVE_TO_GROUND,
-                  text: `M${magnitude.toFixed(1)}`,
-                  font: '600 12px "JetBrains Mono", monospace',
-                  fillColor: Color.WHITE,
-                  outlineColor: Color.BLACK,
-                  outlineWidth: 3,
-                  style: LabelStyle.FILL_AND_OUTLINE,
-                  pixelOffset: new Cartesian2(0, -18),
+                  text: `M${magnitude.toFixed(1)} SISMO`,
                 }
               : undefined,
           billboard: magnitude >= 4.5 ? pulse(magnitude, color, epoch) : undefined,

@@ -4,12 +4,18 @@ import react from '@vitejs/plugin-react';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import flights from './api/flights.ts';
 import military from './api/military.ts';
+import satellites from './api/satellites.ts';
 import world from './api/world.ts';
 
 const cesiumSource = 'node_modules/cesium/Build/Cesium';
 const cesiumBaseUrl = 'cesium';
 
-const API_ROUTES = { '/api/flights': flights, '/api/military': military, '/api/world': world };
+const API_ROUTES = {
+  '/api/flights': flights,
+  '/api/military': military,
+  '/api/world': world,
+  '/api/satellites': satellites,
+};
 
 // Mounts the serverless functions on the dev and preview servers, so the app
 // runs locally without the Vercel CLI.

@@ -4,7 +4,7 @@ import type { Flight } from '../lib/aircraft';
 
 export type CityId = keyof typeof cities;
 export type LayerId = 'flights' | 'military' | 'world' | 'earthquakes' | 'satellites' | 'buildings';
-export type VisionMode = 'normal' | 'night' | 'thermal';
+export type VisionMode = 'normal' | 'crt' | 'night' | 'thermal' | 'noir';
 export type Destination = 'brazil' | 'planet' | 'iss' | CityId;
 
 export interface LayerStatus {

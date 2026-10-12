@@ -1,14 +1,11 @@
 import {
-  Cartesian2,
   Cartesian3,
-  Color,
   ConstantProperty,
   CustomDataSource,
   DistanceDisplayCondition,
   ExtrapolationType,
   HeightReference,
   JulianDate,
-  LabelStyle,
   Math as CesiumMath,
   NearFarScalar,
   SampledPositionProperty,
@@ -27,6 +24,7 @@ import {
 import { formatInt } from '../../lib/format';
 import { destination } from '../../lib/geo';
 import { planeIcon } from '../planeIcon';
+import { tagStyle } from '../tagStyle';
 import type { FlightSource, InfoContent, LayerStatus, MapLayer } from '../types';
 
 // Between updates each plane keeps moving on its last speed and track.
@@ -124,15 +122,10 @@ export function createFlightsLayer(
           scaleByDistance: new NearFarScalar(2e4, 1.1, 8e6, 0.5),
         },
         label: {
+          ...tagStyle(color, { offsetY: -6, fadeFrom: 1e5, fadeTo: 1.5e6 }),
           text: labelText(flight),
           heightReference: reference,
-          font: '600 12px "JetBrains Mono", monospace',
-          fillColor: Color.fromCssColorString(color).brighten(0.4, new Color()),
-          outlineColor: Color.BLACK,
-          outlineWidth: 3,
-          style: LabelStyle.FILL_AND_OUTLINE,
-          pixelOffset: new Cartesian2(0, -24),
-          distanceDisplayCondition: new DistanceDisplayCondition(0, 400_000),
+          distanceDisplayCondition: new DistanceDisplayCondition(0, 2_500_000),
         },
       });
     }

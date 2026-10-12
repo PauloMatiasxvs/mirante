@@ -1,8 +1,8 @@
 import { cachedRoute } from './_lib/cachedRoute.js';
 
-// Every airborne aircraft OpenSky sees worldwide. Anonymous access allows about
-// 100 whole-world queries a day, so the snapshot is refreshed every 15 minutes
-// and the client dead-reckons each plane in between.
+// Every airborne aircraft OpenSky sees worldwide. The free quota allows only a
+// few hundred whole-world queries a day, so the snapshot is refreshed every
+// 15 minutes and the client dead-reckons each plane in between.
 
 /** [icao24, callsign, country, lat, lon, altitudeFt, speedKt, track, verticalRateFpm] */
 export type WorldFlightRow = [
@@ -69,9 +69,33 @@ export function toWorldRows(states: StateVector[]): WorldFlightRow[] {
   return rows;
 }
 
+const TOKEN_URL = 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token';
+
+let token: { value: string; expiresAt: number } | null = null;
+
+// OpenSky blocks anonymous requests from cloud providers (Vercel included).
+// With OPENSKY_CLIENT_ID/SECRET set, requests go out authenticated instead.
+async function authHeader(): Promise<Record<string, string>> {
+  const clientId = process.env.OPENSKY_CLIENT_ID;
+  const clientSecret = process.env.OPENSKY_CLIENT_SECRET;
+  if (!clientId || !clientSecret) return {};
+  if (!token || Date.now() > token.expiresAt) {
+    const response = await fetch(TOKEN_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ grant_type: 'client_credentials', client_id: clientId, client_secret: clientSecret }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!response.ok) throw new Error(`OpenSky auth returned ${response.status}`);
+    const data = (await response.json()) as { access_token: string; expires_in: number };
+    token = { value: data.access_token, expiresAt: Date.now() + (data.expires_in - 60) * 1000 };
+  }
+  return { authorization: `Bearer ${token.value}` };
+}
+
 async function loadWorld(): Promise<WorldResponse> {
   const response = await fetch('https://opensky-network.org/api/states/all', {
-    headers: { 'user-agent': 'mirante (github.com/PauloMatiasxvs/mirante)' },
+    headers: { 'user-agent': 'mirante (github.com/PauloMatiasxvs/mirante)', ...(await authHeader()) },
     signal: AbortSignal.timeout(30_000),
   });
   if (!response.ok) throw new Error(`OpenSky returned ${response.status}`);

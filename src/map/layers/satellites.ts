@@ -1,13 +1,11 @@
 import {
   ArcType,
-  Cartesian2,
   Cartesian3,
   Color,
   CustomDataSource,
-  DistanceDisplayCondition,
   JulianDate,
-  LabelStyle,
   LagrangePolynomialApproximation,
+  NearFarScalar,
   PolylineGlowMaterialProperty,
   SampledPositionProperty,
   type Viewer,
@@ -21,27 +19,35 @@ import {
   twoline2satrec,
   type SatRec,
 } from 'satellite.js';
+import { SATELLITE_GROUPS, type SatelliteGroup, type SatellitesResponse } from '../../../api/satellites';
 import { formatInt, formatLatLon } from '../../lib/format';
 import { parseTle } from '../../lib/tle';
+import { tagStyle } from '../tagStyle';
 import type { InfoContent, LayerStatus, MapLayer } from '../types';
 
-const GROUPS = ['stations', 'visual'];
-// CelesTrak asks clients not to re-download the same data more than every 2 h.
-const TLE_CACHE_MS = 2 * 60 * 60_000;
 const SAMPLE_STEP_S = 20;
 const RESAMPLE_MS = 60_000;
 const DOCKED_DISTANCE_M = 50_000;
 const ISS = 25544;
 const PREFIX = 'sat-';
 
-const STATIONS: Record<number, { label: string; name: string; color: string }> = {
-  25544: { label: 'ISS', name: 'Estação Espacial Internacional', color: '#f0abfc' },
-  48274: { label: 'TIANGONG', name: 'Estação Espacial Chinesa (Tiangong)', color: '#fda4af' },
+const GROUP_STYLE: Record<SatelliteGroup, { color: string; category: string }> = {
+  stations: { color: '#f0abfc', category: 'Estação e naves tripuladas' },
+  visual: { color: '#c4b5fd', category: 'Visível a olho nu' },
+  gnss: { color: '#67e8f9', category: 'Navegação (GPS, Galileo, GLONASS, BeiDou)' },
+  weather: { color: '#86efac', category: 'Meteorologia' },
+  geo: { color: '#fcd34d', category: 'Geoestacionário' },
+};
+
+const STATIONS: Record<number, { label: string; name: string }> = {
+  25544: { label: 'ISS', name: 'Estação Espacial Internacional' },
+  48274: { label: 'TIANGONG', name: 'Estação Espacial Chinesa (Tiangong)' },
 };
 
 interface Satellite {
   name: string;
   norad: number;
+  group: SatelliteGroup;
   satrec: SatRec;
 }
 
@@ -54,25 +60,6 @@ interface Fix {
 
 export interface SatellitesLayer extends MapLayer {
   followIss(): boolean;
-}
-
-async function fetchGroup(group: string): Promise<string> {
-  const key = `mirante:tle:${group}`;
-  try {
-    const cached = JSON.parse(localStorage.getItem(key) ?? 'null') as { at: number; text: string } | null;
-    if (cached && Date.now() - cached.at < TLE_CACHE_MS) return cached.text;
-  } catch {
-    // Storage blocked or corrupt: just fetch again.
-  }
-  const response = await fetch(`https://celestrak.org/NORAD/elements/gp.php?GROUP=${group}&FORMAT=tle`);
-  const text = await response.text();
-  if (!response.ok || !text.includes('\n1 ')) throw new Error(`CelesTrak: ${group}`);
-  try {
-    localStorage.setItem(key, JSON.stringify({ at: Date.now(), text }));
-  } catch {
-    // Cache is a courtesy to CelesTrak, not a requirement.
-  }
-  return text;
 }
 
 function fixAt(satrec: SatRec, date: Date): Fix | null {
@@ -94,31 +81,26 @@ export function createSatellitesLayer(viewer: Viewer, onStatus: (status: LayerSt
   const dataSource = new CustomDataSource('satellites');
   void viewer.dataSources.add(dataSource);
   const satellites = new Map<string, Satellite>();
+  const abort = new AbortController();
   let timer: number | undefined;
-  let destroyed = false;
 
   function addEntity(id: string, satellite: Satellite) {
     const station = STATIONS[satellite.norad];
-    const color = Color.fromCssColorString(station?.color ?? '#c4b5fd');
+    const { color } = GROUP_STYLE[satellite.group];
     dataSource.entities.add({
       id,
       position: new SampledPositionProperty(),
       viewFrom: new Cartesian3(0, -1_800_000, 1_100_000),
       point: {
-        pixelSize: station ? 12 : 5,
-        color,
+        pixelSize: station ? 11 : 4,
+        color: Color.fromCssColorString(color),
         outlineColor: Color.BLACK.withAlpha(0.6),
         outlineWidth: station ? 2 : 1,
+        scaleByDistance: new NearFarScalar(1e6, 1.4, 6e7, 0.8),
       },
       label: {
+        ...tagStyle(color, { offsetY: -4, fadeFrom: 3e6, fadeTo: 6e7 }),
         text: station?.label ?? satellite.name,
-        font: station ? '700 13px "JetBrains Mono", monospace' : '11px "JetBrains Mono", monospace',
-        fillColor: color,
-        outlineColor: Color.BLACK,
-        outlineWidth: 3,
-        style: LabelStyle.FILL_AND_OUTLINE,
-        pixelOffset: new Cartesian2(0, -16),
-        distanceDisplayCondition: station ? undefined : new DistanceDisplayCondition(0, 4_000_000),
       },
     });
   }
@@ -192,14 +174,15 @@ export function createSatellitesLayer(viewer: Viewer, onStatus: (status: LayerSt
 
   async function load() {
     try {
-      const results = await Promise.allSettled(GROUPS.map(fetchGroup));
-      if (destroyed) return;
-      for (const result of results) {
-        if (result.status !== 'fulfilled') continue;
-        for (const tle of parseTle(result.value)) {
+      const response = await fetch('/api/satellites', { signal: abort.signal });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const { groups } = (await response.json()) as SatellitesResponse;
+      // Groups overlap (the ISS is also "visual"); the first group listed wins.
+      for (const group of SATELLITE_GROUPS) {
+        for (const tle of parseTle(groups[group] ?? '')) {
           const id = PREFIX + tle.norad;
           if (satellites.has(id)) continue;
-          const satellite = { name: tle.name, norad: tle.norad, satrec: twoline2satrec(tle.line1, tle.line2) };
+          const satellite = { name: tle.name, norad: tle.norad, group, satrec: twoline2satrec(tle.line1, tle.line2) };
           satellites.set(id, satellite);
           addEntity(id, satellite);
         }
@@ -209,6 +192,7 @@ export function createSatellitesLayer(viewer: Viewer, onStatus: (status: LayerSt
       timer = window.setInterval(resample, RESAMPLE_MS);
       onStatus({ count: satellites.size, error: false });
     } catch (error) {
+      if (abort.signal.aborted) return;
       console.warn('satellites unavailable:', error);
       onStatus({ count: null, error: true });
     }
@@ -238,6 +222,7 @@ export function createSatellitesLayer(viewer: Viewer, onStatus: (status: LayerSt
         kind: station ? 'Estação espacial' : 'Satélite',
         title: station?.name ?? satellite.name,
         rows: [
+          ['Categoria', GROUP_STYLE[satellite.group].category],
           ['Altitude', `${formatInt(fix.heightKm)} km`],
           ['Velocidade', `${formatInt(fix.speedKms * 3600)} km/h`],
           ['Sobre', formatLatLon(fix.lat, fix.lon)],
@@ -250,7 +235,7 @@ export function createSatellitesLayer(viewer: Viewer, onStatus: (status: LayerSt
       };
     },
     destroy() {
-      destroyed = true;
+      abort.abort();
       window.clearInterval(timer);
       viewer.dataSources.remove(dataSource, true);
     },

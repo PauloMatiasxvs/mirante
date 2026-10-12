@@ -1,11 +1,8 @@
 import {
   BillboardCollection,
-  Cartesian2,
   Cartesian3,
-  Color,
   JulianDate,
   LabelCollection,
-  LabelStyle,
   Math as CesiumMath,
   NearFarScalar,
   type Billboard,
@@ -17,6 +14,7 @@ import { countryInPortuguese } from '../../lib/country';
 import { formatInt } from '../../lib/format';
 import { destination } from '../../lib/geo';
 import { planeIcon } from '../planeIcon';
+import { tagStyle } from '../tagStyle';
 import type { FlightSource, InfoContent, LayerStatus, MapLayer } from '../types';
 import { describeVertical } from './flights';
 
@@ -25,8 +23,8 @@ import { describeVertical } from './flights';
 const REFRESH_MS = 5 * 60_000;
 const MOVE_INTERVAL_MS = 2_000;
 const MAX_DEAD_RECKONING_S = 20 * 60;
-const LABEL_RANGE_M = 150_000;
-const MAX_LABELS = 60;
+const LABEL_RANGE_M = 400_000;
+const MAX_LABELS = 40;
 const PREFIX = 'world-';
 const COLOR = '#e2e8f0';
 
@@ -71,7 +69,7 @@ export function createWorldFlightsLayer(
   const hidden = new Set<string>();
   const abort = new AbortController();
   const icon = planeIcon(COLOR, '#0f172a');
-  const labelColor = Color.fromCssColorString(COLOR);
+  const tag = tagStyle(COLOR, { offsetY: -6, fadeFrom: 5e4, fadeTo: 4e5 });
   let snapshotTime = Date.now();
 
   function positionAt(flight: Flight, ms: number): Cartesian3 {
@@ -108,14 +106,9 @@ export function createWorldFlightsLayer(
       .slice(0, MAX_LABELS)
       .forEach(({ entry, position }) =>
         labels.add({
+          ...tag,
           position,
           text: `${flightName(entry.flight)} · ${flightLevel(entry.flight)}`,
-          font: '600 12px "JetBrains Mono", monospace',
-          fillColor: labelColor,
-          outlineColor: Color.BLACK,
-          outlineWidth: 3,
-          style: LabelStyle.FILL_AND_OUTLINE,
-          pixelOffset: new Cartesian2(0, -22),
         }),
       );
     scene.requestRender();
