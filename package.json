@@ -1,15 +1,37 @@
 {
   "name": "mirante",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Globo 3D com voos sobre o Brasil, terremotos e satélites em tempo real, usando apenas dados abertos.",
   "type": "module",
   "scripts": {
-    "start": "node server.mjs"
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "data:buildings": "node scripts/fetch-buildings.mjs",
+    "data:basemap": "node scripts/fetch-basemap.mjs"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "license": "MIT",
-  "author": "PauloMatiasxvs"
+  "author": "PauloMatiasxvs",
+  "dependencies": {
+    "cesium": "^1.146.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "satellite.js": "^6.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vite-plugin-static-copy": "^4.1.1",
+    "vitest": "^5.0.3"
+  }
 }

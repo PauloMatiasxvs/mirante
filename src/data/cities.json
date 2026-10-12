@@ -1,0 +1,20 @@
+{
+  "fortaleza": {
+    "name": "Fortaleza",
+    "target": { "lat": -3.7262, "lon": -38.4985 },
+    "view": { "height": 900, "pitch": -24, "heading": 170 },
+    "area": { "west": -38.508, "south": -3.738, "east": -38.49, "north": -3.722 }
+  },
+  "sao-paulo": {
+    "name": "São Paulo",
+    "target": { "lat": -23.5614, "lon": -46.6565 },
+    "view": { "height": 1250, "pitch": -26, "heading": 305 },
+    "area": { "west": -46.666, "south": -23.57, "east": -46.648, "north": -23.554 }
+  },
+  "rio-de-janeiro": {
+    "name": "Rio de Janeiro",
+    "target": { "lat": -22.97, "lon": -43.184 },
+    "view": { "height": 1000, "pitch": -22, "heading": 300 },
+    "area": { "west": -43.194, "south": -22.982, "east": -43.176, "north": -22.964 }
+  }
+}

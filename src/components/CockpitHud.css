@@ -1,0 +1,238 @@
+.cockpit {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  color: var(--accent);
+  font-family: var(--mono);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.45));
+}
+
+.in-cockpit .vignette {
+  display: none;
+}
+
+.cockpit__title {
+  position: absolute;
+  top: 26px;
+  left: 50%;
+  translate: -50% 0;
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+}
+
+.cockpit__title b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.cockpit__model {
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.cockpit__live {
+  color: #f87171;
+  animation: blink 1.2s steps(2, start) infinite;
+}
+
+.cockpit__tape {
+  position: absolute;
+  top: 70px;
+  left: 50%;
+  width: 600px;
+  max-width: 70vw;
+  height: 46px;
+  translate: -50% 0;
+  overflow: visible;
+}
+
+.cockpit__tape line {
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+
+.cockpit__tape text {
+  fill: currentColor;
+  font: 600 12px var(--mono);
+  text-anchor: middle;
+}
+
+.cockpit__tape-index {
+  fill: currentColor;
+}
+
+.cockpit__marker {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 90px;
+  height: 45px;
+  translate: -50% -50%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+.cockpit__readouts {
+  position: absolute;
+  bottom: 128px;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 56px;
+}
+
+.cockpit__readouts div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 130px;
+}
+
+.cockpit__readouts small {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.cockpit__readouts strong {
+  color: var(--text);
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.cockpit__heading strong {
+  color: var(--accent);
+  font-size: 30px;
+}
+
+.cockpit__contacts {
+  position: absolute;
+  top: 84px;
+  left: var(--gutter);
+  width: 230px;
+  padding: 10px 14px;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  pointer-events: auto;
+}
+
+.cockpit__contacts h2 {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.cockpit__contacts ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cockpit__contacts button {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 5px 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.cockpit__contacts button:hover b {
+  color: var(--accent);
+}
+
+.cockpit__contacts span {
+  color: var(--muted);
+}
+
+.cockpit__actions {
+  position: absolute;
+  bottom: 76px;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.cockpit__actions button {
+  padding: 7px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--glass);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.cockpit__actions button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.cockpit__actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.cockpit__hint {
+  position: absolute;
+  left: var(--gutter);
+  bottom: 30px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+
+@media (max-width: 720px) {
+  .cockpit__contacts,
+  .cockpit__hint {
+    display: none;
+  }
+
+  .cockpit__readouts {
+    gap: 18px;
+    bottom: 120px;
+  }
+
+  .cockpit__readouts div {
+    min-width: 0;
+  }
+
+  .cockpit__readouts strong {
+    font-size: 26px;
+  }
+
+  .cockpit__title {
+    top: 64px;
+    font-size: 10px;
+  }
+
+  .cockpit__tape {
+    top: 92px;
+  }
+}

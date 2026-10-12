@@ -1,0 +1,73 @@
+.drawer {
+  position: fixed;
+  z-index: 2;
+  top: 84px;
+  left: var(--gutter);
+  min-width: 190px;
+  padding: 0 14px;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.drawer[open] {
+  padding-bottom: 8px;
+}
+
+.drawer__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 9px 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  list-style: none;
+  cursor: pointer;
+}
+
+.drawer__title::-webkit-details-marker {
+  display: none;
+}
+
+.drawer__title::after {
+  content: '+';
+  color: var(--text);
+  font-size: 14px;
+}
+
+.drawer[open] .drawer__title::after {
+  content: '−';
+}
+
+.drawer__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.drawer__item input {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.drawer__item:has(input:not(:checked)) span {
+  opacity: 0.45;
+}
+
+.in-cockpit .drawer {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .drawer {
+    top: 70px;
+  }
+}

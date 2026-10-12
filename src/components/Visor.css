@@ -1,0 +1,139 @@
+.visor {
+  --radius: min(42vh, 42vw);
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  color: var(--accent);
+  font-family: var(--mono);
+  text-shadow: var(--text-shadow);
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 var(--radius), rgba(2, 5, 11, 0.6) calc(var(--radius) + 1px)),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px);
+}
+
+/* The regular vignette steps aside while the visor is up. */
+body:has(.visor) .vignette {
+  display: none;
+}
+
+.visor__compass {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(2 * var(--radius));
+  height: calc(2 * var(--radius));
+  translate: -50% -50%;
+  overflow: visible;
+}
+
+.visor__rim {
+  fill: none;
+  stroke: currentColor;
+  stroke-opacity: 0.4;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.visor__tick {
+  stroke: currentColor;
+  stroke-opacity: 0.3;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.visor__tick--major {
+  stroke-opacity: 0.75;
+}
+
+.visor__compass text {
+  fill: currentColor;
+  fill-opacity: 0.85;
+  font: 500 5px var(--mono);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.visor__reticle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 120px;
+  height: 120px;
+  translate: -50% -50%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.7;
+}
+
+.visor__reticle circle {
+  fill: currentColor;
+}
+
+.visor__header {
+  position: absolute;
+  top: calc(50% - var(--radius) + 34px);
+  left: 50%;
+  translate: -50% 0;
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.visor__rec {
+  color: #f87171;
+  animation: blink 1.2s steps(2, start) infinite;
+}
+
+.visor__data {
+  position: absolute;
+  bottom: 64px;
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  font-size: 11px;
+}
+
+.visor__data div {
+  display: grid;
+  grid-template-columns: 90px auto;
+  gap: 14px;
+}
+
+.visor__data dt {
+  align-self: center;
+  opacity: 0.55;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.visor__data dd {
+  margin: 0;
+}
+
+.visor__data--left {
+  left: var(--gutter);
+}
+
+.visor__data--right {
+  right: var(--gutter);
+}
+
+.visor__data--right dd {
+  text-align: right;
+}
+
+@media (max-width: 720px) {
+  .visor__data {
+    display: none;
+  }
+
+  .visor__header {
+    font-size: 10px;
+  }
+}

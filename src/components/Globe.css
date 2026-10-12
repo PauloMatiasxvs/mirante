@@ -1,0 +1,62 @@
+.globe {
+  position: fixed;
+  inset: 0;
+}
+
+.vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.5));
+}
+
+.credits {
+  position: fixed;
+  z-index: 2;
+  right: var(--gutter);
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 10px;
+  text-shadow: var(--text-shadow);
+}
+
+.credits a {
+  color: var(--muted);
+}
+
+.credits__cesium {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.credits__cesium > * {
+  position: static !important;
+  display: inline-flex !important;
+  align-items: center;
+}
+
+.credits__cesium .cesium-credit-logoContainer img {
+  height: 13px;
+  opacity: 0.8;
+}
+
+.credits__cesium .cesium-credit-textContainer {
+  display: none !important;
+}
+
+.credits__cesium .cesium-credit-expand-link {
+  color: var(--muted);
+  text-decoration: underline;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .credits {
+    display: none;
+  }
+}

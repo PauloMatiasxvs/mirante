@@ -1,0 +1,68 @@
+.dock {
+  position: fixed;
+  z-index: 2;
+  bottom: var(--gutter);
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: calc(100vw - 2 * var(--gutter));
+  padding: 5px;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dock__group {
+  display: flex;
+  gap: 2px;
+}
+
+.dock__button {
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.dock__button:hover {
+  color: var(--text);
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.dock__button--active {
+  color: var(--accent);
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.dock__divider {
+  flex: none;
+  width: 1px;
+  height: 18px;
+  margin: 0 6px;
+  background: var(--line);
+}
+
+@media (max-width: 720px) {
+  .dock {
+    left: var(--gutter);
+    right: var(--gutter);
+    translate: none;
+    border-radius: 12px;
+  }
+}

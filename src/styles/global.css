@@ -1,0 +1,91 @@
+:root {
+  --glass: rgba(6, 10, 18, 0.62);
+  --glass-strong: rgba(6, 10, 18, 0.82);
+  --line: rgba(148, 163, 184, 0.16);
+  --text: #e2e8f0;
+  --muted: #8b98ab;
+  --accent: #38bdf8;
+  --error: #f87171;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --gutter: 22px;
+  --text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+}
+
+/* The accent follows the globe's vision mode. */
+body[data-mode='night'] {
+  --accent: #4ade80;
+}
+
+body[data-mode='thermal'] {
+  --accent: #fb923c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #02050b;
+  color: var(--text);
+  font: 13px/1.4 Inter, system-ui, sans-serif;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+button:focus-visible,
+summary:focus-visible,
+label:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.dot {
+  display: inline-block;
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.dot--flights {
+  background: #7dd3fc;
+}
+
+.dot--earthquakes {
+  background: #fb923c;
+}
+
+.dot--satellites {
+  background: #c4b5fd;
+}
+
+.dot--buildings {
+  background: #e7ebf0;
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --gutter: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+  }
+}
