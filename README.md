@@ -38,46 +38,65 @@ visor de satélite, com os aviões voando sobre o Brasil, os terremotos das últ
 | --- | --- | --- |
 | ![Paulista em modo térmico](docs/paulista-termica.jpg) | ![Brasil](docs/brasil.jpg) | ![ISS](docs/iss.jpg) |
 
+## Stack
+
+React 19 + TypeScript, Vite, [CesiumJS](https://cesium.com/platform/cesiumjs/) para o globo e
+[satellite.js](https://github.com/shashwatak/satellite-js) para as órbitas. Testes com Vitest e
+CI no GitHub Actions. Nenhuma chave de API.
+
 ## Como rodar
 
-Precisa só do [Node.js](https://nodejs.org) 20 ou mais novo. Não há dependências
-para instalar e nenhuma chave de API.
+Precisa do [Node.js](https://nodejs.org) 22 ou mais novo.
 
 ```bash
 git clone https://github.com/PauloMatiasxvs/mirante.git
 cd mirante
-npm start
+npm install
+npm run dev
 ```
 
 Depois abra <http://localhost:5180>.
 
-## Como funciona
+| Comando | O que faz |
+| --- | --- |
+| `npm run dev` | servidor de desenvolvimento (já inclui a rota `/api/flights`) |
+| `npm run build` | checa os tipos e gera a versão de produção em `dist/` |
+| `npm test` | roda os testes |
+| `npm run data:buildings` | baixa de novo os prédios das cidades (OpenStreetMap) |
+| `npm run data:basemap` | gera de novo os nomes e fronteiras (Natural Earth) |
+
+## Arquitetura
+
+O Cesium é imperativo e roda fora do ciclo de render do React. Por isso o projeto separa
+as duas coisas: um "motor" em `src/map` cuida do globo e publica o estado num store
+pequeno, e os componentes React só leem esse estado (via `useSyncExternalStore`) e chamam
+ações do motor.
 
 ```
-public/                 site estático (HTML, CSS e JavaScript puro)
-  js/main.js            monta o globo, a luz, as sombras e liga os controles
-  js/camadas/           uma camada por fonte de dados (voos, terremotos, satélites, prédios)
-  js/visor.js           visor de satélite e telemetria
-  js/cockpit.js         modo cockpit (primeira pessoa num avião ao vivo)
-  js/mapa-base.js       nomes em português e fronteiras desenhados sobre o relevo
-  js/modos.js           shaders de visão noturna e térmica
-  js/cidades.js         cidades em 3D: área dos prédios e ângulo de câmera
-  dados/                prédios de cada cidade, já processados
-api/flights.js          rota que busca os voos (o adsb.lol não libera CORS)
-scripts/                atualizam os prédios (OpenStreetMap) e os nomes e fronteiras (Natural Earth)
-server.mjs              servidor local sem dependências
+api/flights.ts          função serverless: busca os voos no adsb.lol (que não libera CORS)
+src/
+  map/
+    engine.ts           cria o viewer, luz, sombras, camadas; expõe ações e o store
+    layers/             uma camada por fonte: voos, terremotos, satélites, prédios
+    cockpit.ts          câmera em primeira pessoa num avião ao vivo
+    telemetry.ts        o que a câmera está vendo (para o visor)
+    basemap.ts          nomes em português e fronteiras
+    visionModes.ts      shaders de visão noturna e térmica
+  components/           interface: barra, gaveta de camadas, ficha, visor, HUD do cockpit
+  hooks/                ponte entre o store do motor e o React
+  lib/                  funções puras (geografia, formatação, tradução) e seus testes
+  data/cities.json      cidades em 3D: área dos prédios e ângulo de câmera
+public/data/            prédios, nomes e fronteiras já processados
+scripts/                geram os arquivos de public/data
 ```
 
-Para incluir outra cidade em 3D, adicione-a em `public/js/cidades.js`, rode
-`node scripts/baixar-predios.mjs <cidade>` e crie o botão em `index.html`.
-
-O globo usa o [CesiumJS](https://cesium.com/platform/cesiumjs/) e as órbitas usam o
-[satellite.js](https://github.com/shashwatak/satellite-js), ambos carregados por CDN.
+Para incluir outra cidade em 3D, adicione-a em `src/data/cities.json`, rode
+`npm run data:buildings -- <id-da-cidade>` e crie o botão em `src/components/Dock.tsx`.
 
 ### Publicar na Vercel
 
-O projeto já está pronto para a [Vercel](https://vercel.com): a pasta `public/` vira o
-site e `api/flights.js` vira uma função serverless. Basta importar o repositório.
+Importe o repositório na [Vercel](https://vercel.com): ela detecta o Vite, publica o `dist/`
+e transforma `api/flights.ts` numa função serverless.
 
 ## Fontes de dados
 
